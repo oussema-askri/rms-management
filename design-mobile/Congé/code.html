@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#fbf9f5",
+                    "on-tertiary-fixed": "#2c1600",
+                    "on-surface": "#1b1c1a",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#001c39",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#fece5c",
+                    "surface-container": "#f0eeea",
+                    "surface-variant": "#e4e2de",
+                    "on-tertiary": "#ffffff",
+                    "inverse-surface": "#30312e",
+                    "surface-container-high": "#eae8e4",
+                    "outline-variant": "#c2c6d0",
+                    "surface-container-low": "#f5f3ef",
+                    "secondary-fixed-dim": "#efc050",
+                    "on-background": "#1b1c1a",
+                    "on-secondary-fixed": "#251a00",
+                    "outline": "#737780",
+                    "inverse-primary": "#a3c9ff",
+                    "secondary-fixed": "#ffdf9c",
+                    "on-surface-variant": "#42474f",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#704000",
+                    "on-primary-container": "#95bff9",
+                    "on-secondary-container": "#745700",
+                    "surface-dim": "#dbdad6",
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "surface": "#fbf9f5",
+                    "surface-container-highest": "#e4e2de",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#1e4d80",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#17487b",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#ffdcbe",
+                    "tertiary-fixed-dim": "#feb871",
+                    "secondary": "#785a00",
+                    "primary-fixed": "#d3e3ff",
+                    "on-tertiary-fixed-variant": "#693c00",
+                    "tertiary": "#502c00",
+                    "primary-fixed-dim": "#a3c9ff",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f2f0ec",
+                    "background": "#fbf9f5",
+                    "surface-tint": "#356094",
+                    "on-tertiary-container": "#f2ae68",
+                    "primary": "#003664"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .brass-gradient {
+            background: linear-gradient(135deg, #785a00 0%, #745700 100%);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen pb-32">
+<!-- TopAppBar Shell -->
+<header class="w-full sticky top-0 z-50 bg-[#fbf9f5] dark:bg-slate-900 shadow-[0_8px_24px_rgba(0,54,100,0.08)]">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined" data-icon="anchor">anchor</span>
+</div>
+<h1 class="text-xl font-bold text-[#003664] dark:text-blue-200 font-headline tracking-tight">Gestion Maritime</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-full bg-surface-container overflow-hidden border-2 border-surface-container-high">
+<img alt="Profil de l'utilisateur" class="w-full h-full object-cover" data-alt="portrait of a professional maritime officer in a dark navy blue uniform looking confident with natural daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdWuDaleopEg_bQs8EyqmhUuwBNbuYVhN4CUNy6fsVUuAaiF74TDrKyn8ZecpYduxrkyOaf5XX6A1VG_wpv5ItSemno2UaAByTPcvuqsyYgsYNEU64E_slZzM_gS5z85BD80pNkxorZ1zFHfz2b4aKH9YUAuyPE0e6IM593wg6plokhpGSH_JJnS-C_UqgeLz3xpYHhVXC27BePYgvP1oYBc2W_MFqAHsZYjQpAFcCr0LIPFV9Yld3oSXEstuAebYwbXgzAsmyzPc"/>
+</div>
+</div>
+</div>
+<div class="bg-[#f5f3ef] dark:bg-slate-800 h-[2px] w-full"></div>
+</header>
+<main class="max-w-6xl mx-auto px-6 pt-8 space-y-10">
+<!-- Header Section: Title & Editorial Typography -->
+<section class="space-y-2">
+<p class="font-label text-secondary font-semibold uppercase tracking-widest text-xs">Suivi des absences</p>
+<h2 class="font-headline text-4xl md:text-5xl font-extrabold text-primary tracking-tight">Mes Congés</h2>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Leave Balance Visualizer -->
+<div class="lg:col-span-5 bg-surface-container-low rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute -top-10 -right-10 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[160px]" data-icon="timer_10_alt_1">timer_10_alt_1</span>
+</div>
+<h3 class="font-headline text-lg font-bold text-primary mb-8 self-start">Solde Annuel</h3>
+<!-- Circular Progress Ring -->
+<div class="relative flex items-center justify-center">
+<svg class="w-64 h-64 transform -rotate-90">
+<circle class="text-surface-container-high" cx="128" cy="128" fill="transparent" r="110" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-secondary transition-all duration-1000 ease-out" cx="128" cy="128" fill="transparent" r="110" stroke="currentColor" stroke-dasharray="691" stroke-dashoffset="230" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-headline text-6xl font-extrabold text-primary">12</span>
+<div class="h-1 w-12 bg-outline-variant my-2"></div>
+<span class="font-label text-sm text-on-surface-variant font-medium">Sur 18 jours acquis</span>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-2 gap-4 w-full">
+<div class="bg-surface-container-lowest p-4 rounded-2xl">
+<p class="text-xs text-on-surface-variant font-medium mb-1">En attente</p>
+<p class="text-xl font-bold text-primary">2,5 j</p>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl">
+<p class="text-xs text-on-surface-variant font-medium mb-1">Pris</p>
+<p class="text-xl font-bold text-secondary">3,5 j</p>
+</div>
+</div>
+</div>
+<!-- Right Column: Interactive Calendar (Architectural Look) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/10 shadow-sm">
+<div class="flex justify-between items-center mb-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="calendar_month">calendar_month</span>
+<h3 class="font-headline text-xl font-bold text-primary">Planning de Juin 2024</h3>
+</div>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-7 gap-y-6 text-center">
+<!-- Days Label -->
+<div class="text-xs font-bold text-outline uppercase tracking-wider">Lun</div>
+<div class="text-xs font-bold text-outline uppercase tracking-wider">Mar</div>
+<div class="text-xs font-bold text-outline uppercase tracking-wider">Mer</div>
+<div class="text-xs font-bold text-outline uppercase tracking-wider">Jeu</div>
+<div class="text-xs font-bold text-outline uppercase tracking-wider">Ven</div>
+<div class="text-xs font-bold text-outline uppercase tracking-wider">Sam</div>
+<div class="text-xs font-bold text-outline uppercase tracking-wider">Dim</div>
+<!-- Calendar Cells (Simplified for Design) -->
+<div class="text-on-surface-variant/30 text-sm py-4">27</div>
+<div class="text-on-surface-variant/30 text-sm py-4">28</div>
+<div class="text-on-surface-variant/30 text-sm py-4">29</div>
+<div class="text-on-surface-variant/30 text-sm py-4">30</div>
+<div class="text-on-surface-variant/30 text-sm py-4">31</div>
+<div class="text-primary font-bold text-sm py-4">1</div>
+<div class="text-primary font-bold text-sm py-4">2</div>
+<div class="text-primary font-bold text-sm py-4">3</div>
+<div class="text-primary font-bold text-sm py-4">4</div>
+<div class="text-primary font-bold text-sm py-4">5</div>
+<div class="text-primary font-bold text-sm py-4">6</div>
+<!-- Leave Range -->
+<div class="relative py-4">
+<div class="absolute inset-y-1 left-0 right-[-100%] bg-secondary/15 rounded-l-full z-0"></div>
+<span class="relative z-10 text-secondary font-extrabold text-sm">7</span>
+</div>
+<div class="relative py-4">
+<div class="absolute inset-y-1 left-[-100%] right-[-100%] bg-secondary/15 z-0"></div>
+<span class="relative z-10 text-secondary font-extrabold text-sm">8</span>
+</div>
+<div class="relative py-4">
+<div class="absolute inset-y-1 left-[-100%] right-0 bg-secondary/15 rounded-r-full z-0"></div>
+<span class="relative z-10 text-secondary font-extrabold text-sm">9</span>
+</div>
+<div class="text-primary font-bold text-sm py-4">10</div>
+<div class="text-primary font-bold text-sm py-4">11</div>
+<div class="text-primary font-bold text-sm py-4">12</div>
+<div class="text-primary font-bold text-sm py-4">13</div>
+<div class="text-primary font-bold text-sm py-4">14</div>
+<div class="text-primary font-bold text-sm py-4">15</div>
+<div class="text-primary font-bold text-sm py-4">16</div>
+<div class="text-primary font-bold text-sm py-4 bg-primary text-on-primary rounded-xl">17</div>
+<div class="text-primary font-bold text-sm py-4">18</div>
+<div class="text-primary font-bold text-sm py-4">19</div>
+<div class="text-primary font-bold text-sm py-4">20</div>
+<div class="text-primary font-bold text-sm py-4">21</div>
+<div class="text-primary font-bold text-sm py-4">22</div>
+<div class="text-primary font-bold text-sm py-4">23</div>
+</div>
+<div class="mt-8 pt-8 border-t border-outline-variant/10 flex items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-secondary"></div>
+<span class="text-xs font-medium text-on-surface-variant">Congés Approuvés</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-xs font-medium text-on-surface-variant">Aujourd'hui</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Request List: Editorial Card Pattern (No dividers) -->
+<section class="space-y-6">
+<div class="flex justify-between items-end">
+<h3 class="font-headline text-2xl font-bold text-primary">Historique des Demandes</h3>
+<button class="text-secondary font-bold text-sm flex items-center gap-1 hover:underline">
+                    Tout voir <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-4">
+<!-- Request Item 1 -->
+<div class="flex flex-col md:flex-row md:items-center justify-between p-6 bg-surface-container-low rounded-2xl hover:bg-surface-container transition-colors group">
+<div class="flex items-center gap-6">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-lowest flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-3xl" data-icon="beach_access">beach_access</span>
+</div>
+<div>
+<p class="font-headline font-bold text-lg text-primary">Congés Payés Annuels</p>
+<p class="font-label text-sm text-on-surface-variant">7 Juin — 9 Juin (3 jours)</p>
+</div>
+</div>
+<div class="mt-4 md:mt-0 flex items-center gap-4">
+<span class="px-4 py-1.5 rounded-full bg-green-100 text-green-800 text-xs font-bold uppercase tracking-wider">Approuvé</span>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest/0 group-hover:bg-surface-container-highest transition-all flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Request Item 2 -->
+<div class="flex flex-col md:flex-row md:items-center justify-between p-6 bg-surface-container-low rounded-2xl hover:bg-surface-container transition-colors group">
+<div class="flex items-center gap-6">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-lowest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="medical_services">medical_services</span>
+</div>
+<div>
+<p class="font-headline font-bold text-lg text-primary">Rendez-vous Médical</p>
+<p class="font-label text-sm text-on-surface-variant">14 Mai — 14 Mai (0,5 jour)</p>
+</div>
+</div>
+<div class="mt-4 md:mt-0 flex items-center gap-4">
+<span class="px-4 py-1.5 rounded-full bg-orange-100 text-orange-800 text-xs font-bold uppercase tracking-wider">En attente</span>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest/0 group-hover:bg-surface-container-highest transition-all flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- FAB for New Request -->
+<button class="fixed bottom-28 right-6 w-16 h-16 brass-gradient text-white rounded-2xl shadow-[0_8px_24px_rgba(0,54,100,0.15)] flex items-center justify-center active:scale-95 transition-all z-40 group">
+<span class="material-symbols-outlined text-3xl transition-transform group-hover:rotate-90" data-icon="add">add</span>
+</button>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-2xl bg-[#fbf9f5]/85 dark:bg-slate-900/85 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,54,100,0.05)] border-t border-[#c26b10]/15">
+<div class="flex justify-around items-center w-full px-2 pb-6 pt-2">
+<!-- Accueil -->
+<a class="flex flex-col items-center justify-center text-[#1E4D80] px-4 py-1.5 active:scale-90 transition-transform hover:bg-[#f0eeea] rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-['Inter'] text-[11px] font-medium">Accueil</span>
+</a>
+<!-- Planning -->
+<a class="flex flex-col items-center justify-center text-[#1E4D80] px-4 py-1.5 active:scale-90 transition-transform hover:bg-[#f0eeea] rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="event_note">event_note</span>
+<span class="font-['Inter'] text-[11px] font-medium">Planning</span>
+</a>
+<!-- Dépenses -->
+<a class="flex flex-col items-center justify-center text-[#1E4D80] px-4 py-1.5 active:scale-90 transition-transform hover:bg-[#f0eeea] rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="photo_camera">photo_camera</span>
+<span class="font-['Inter'] text-[11px] font-medium">Dépenses</span>
+</a>
+<!-- Congés (Active) -->
+<a class="flex flex-col items-center justify-center bg-gradient-to-br from-[#785a00] to-[#745700] text-white rounded-xl px-4 py-1.5 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="timer_10_alt_1" style="font-variation-settings: 'FILL' 1;">timer_10_alt_1</span>
+<span class="font-['Inter'] text-[11px] font-medium">Congés</span>
+</a>
+</div>
+</nav>
+</body></html>

@@ -1,0 +1,68 @@
+/* frontend/src/components/shared/BonDeReceptionView.css */
+.bon-view-modal {
+  max-width: 1000px;
+  max-height: 90vh;
+}
+
+.bon-view-content {
+  padding: 30px;
+  max-height: calc(90vh - 140px);
+  overflow-y: auto;
+}
+
+.bon-info-section,
+.taches-section,
+.signature-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: var(--surface-container-low);
+  border-radius: 8px;
+}
+
+.bon-info-section h3,
+.taches-section h3 {
+  margin: 0 0 15px 0;
+  color: var(--on-surface);
+  font-size: 18px;
+  border-bottom: 2px solid #2D5F9A;
+  padding-bottom: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.taches-table {
+  overflow-x: auto;
+}
+
+.taches-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.taches-table th,
+.taches-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.taches-table th {
+  background: #2D5F9A;
+  color: white;
+  font-weight: 600;
+}
+
+.signature-section {
+  background: var(--status-success-bg);
+  border-left: 4px solid #27976A;
+}

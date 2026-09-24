@@ -1,0 +1,222 @@
+/* The page was a 600px column pinned to the left, leaving most of the screen
+   empty. It is now a two-column grid that uses the full width, collapsing to a
+   single column when there is no room for two. */
+.profile-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  align-items: start;
+  gap: var(--space-lg);
+  width: 100%;
+  /* Stated explicitly: the previous rule capped this at 600px, and leaving it
+     unset would let any stale or re-added cap keep the page in a narrow column. */
+  max-width: none;
+}
+
+/* The identity card reads better stacked once it has a column to itself. */
+.profile-page .profile-card {
+  flex-direction: column;
+  text-align: center;
+}
+
+.profile-page .profile-info {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .profile-page {
+    grid-template-columns: 1fr;
+  }
+  .profile-page .profile-card {
+    flex-direction: row;
+    text-align: left;
+  }
+}
+
+/* ===== PROFILE CARD ===== */
+.profile-card {
+  background: var(--surface-container-lowest);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  border-left: 3px solid var(--secondary);
+}
+
+.profile-avatar-large {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--primary-container);
+  color: var(--on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  font-family: var(--font-headline);
+  flex-shrink: 0;
+}
+
+.profile-info { flex: 1; }
+
+.profile-name {
+  margin: 0 0 4px 0;
+  font-family: var(--font-headline);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.profile-role-badge {
+  display: inline-block;
+  background: var(--primary-fixed);
+  color: var(--primary);
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-detail-row {
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--text-sm);
+}
+
+.detail-label {
+  color: var(--secondary);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: var(--on-surface);
+  font-weight: 500;
+}
+
+/* ===== PASSWORD CARD ===== */
+.password-card {
+  background: var(--surface-container-lowest);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.password-card-header {
+  margin-bottom: var(--space-lg);
+}
+
+.password-card-header h3 {
+  margin: 0 0 4px 0;
+  font-family: var(--font-headline);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.password-card-header p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--outline);
+}
+
+/* ===== ALERTS ===== */
+.profile-page .alert {
+  padding: 10px var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  margin-bottom: var(--space-lg);
+  border-left: 3px solid;
+}
+
+.profile-page .alert-success {
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+  border-color: var(--status-success);
+}
+
+.profile-page .alert-error {
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+  border-color: var(--status-danger);
+}
+
+/* ===== FORM ===== */
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.profile-page .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-page .form-group label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--primary);
+  font-family: var(--font-label);
+}
+
+.profile-page .form-group input {
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 2px solid var(--outline-variant);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  color: var(--on-surface);
+  background: var(--surface-container-high);
+  transition: all var(--transition-fast);
+}
+
+.profile-page .form-group input:focus {
+  outline: none;
+  border-bottom-color: var(--secondary);
+  box-shadow: 0 2px 0 0 var(--secondary);
+}
+
+.btn-save {
+  background: var(--brass-gradient);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-family: var(--font-headline);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  align-self: flex-start;
+  box-shadow: 0 2px 8px rgba(120, 90, 0, 0.2);
+}
+
+.btn-save:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-save:disabled {
+  background: var(--surface-container-high);
+  color: var(--outline);
+  cursor: not-allowed;
+  box-shadow: none;
+}

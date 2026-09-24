@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#fbf9f5",
+                    "on-tertiary-fixed": "#2c1600",
+                    "on-surface": "#1b1c1a",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#001c39",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#fece5c",
+                    "surface-container": "#f0eeea",
+                    "surface-variant": "#e4e2de",
+                    "on-tertiary": "#ffffff",
+                    "inverse-surface": "#30312e",
+                    "surface-container-high": "#eae8e4",
+                    "outline-variant": "#c2c6d0",
+                    "surface-container-low": "#f5f3ef",
+                    "secondary-fixed-dim": "#efc050",
+                    "on-background": "#1b1c1a",
+                    "on-secondary-fixed": "#251a00",
+                    "outline": "#737780",
+                    "inverse-primary": "#a3c9ff",
+                    "secondary-fixed": "#ffdf9c",
+                    "on-surface-variant": "#42474f",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#704000",
+                    "on-primary-container": "#95bff9",
+                    "on-secondary-container": "#745700",
+                    "surface-dim": "#dbdad6",
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "surface": "#fbf9f5",
+                    "surface-container-highest": "#e4e2de",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#1e4d80",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#17487b",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#ffdcbe",
+                    "tertiary-fixed-dim": "#feb871",
+                    "secondary": "#785a00",
+                    "primary-fixed": "#d3e3ff",
+                    "on-tertiary-fixed-variant": "#693c00",
+                    "tertiary": "#502c00",
+                    "primary-fixed-dim": "#a3c9ff",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f2f0ec",
+                    "background": "#fbf9f5",
+                    "surface-tint": "#356094",
+                    "on-tertiary-container": "#f2ae68",
+                    "primary": "#003664"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .brass-gradient {
+            background: linear-gradient(135deg, #785a00 0%, #745700 100%);
+        }
+        .glass-panel {
+            background: rgba(251, 249, 245, 0.85);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-50 bg-[#fbf9f5] dark:bg-slate-900 shadow-[0_8px_24px_rgba(0,54,100,0.08)]">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#1E4D80] dark:text-blue-400" data-icon="anchor">anchor</span>
+<h1 class="font-['Manrope'] font-semibold tracking-tight text-xl font-bold text-[#003664] dark:text-blue-200">Gestion Maritime</h1>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden ring-2 ring-secondary/20">
+<img alt="Profil de l'utilisateur" data-alt="close-up portrait of a professional maritime officer in white uniform with blurred harbor background at sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuejsW8aq3FjCPpsuhVqMNGzBskowJubuJHa0AyAx0N1iJ9MdY8yxgHdcX8txVC3asbaKSuupXA6FVQWRE6W4-M0ON9ezygphhwDFMcL6p0m22vAVkDppEDZ79VWOpQ3AKN_YO9KrsoBYZm5GuRDv7i7h9mGZdjcDMKZ4XTVR4ULYJLTjnVFYYm-xac37nvhCw7QeloInV_36UCKsTX0yiEukmSF761fIE98A7bSgMu9FNpeTJaYi9C7ZxbzsC4Lzg4PrJXxnUjq4"/>
+</div>
+</div>
+<div class="bg-[#f5f3ef] dark:bg-slate-800 h-[2px] w-full"></div>
+</header>
+<main class="max-w-md mx-auto px-6 pt-6 pb-32">
+<!-- Page Title -->
+<div class="mb-8">
+<h2 class="font-headline text-3xl font-extrabold text-primary tracking-tight">Nouvelle Dépense</h2>
+<p class="text-on-surface-variant font-body mt-1">Soumission rapide de justificatif</p>
+</div>
+<!-- Camera / Preview Section -->
+<section class="mb-8">
+<div class="relative group">
+<div class="w-full aspect-[3/4] bg-surface-container-high rounded-xl overflow-hidden shadow-[0_8px_24px_rgba(0,54,100,0.08)] flex flex-col items-center justify-center border-b-2 border-outline-variant/15 transition-all group-hover:bg-surface-container-highest">
+<img class="w-full h-full object-cover opacity-60 mix-blend-multiply" data-alt="a crisp top-down view of a printed restaurant receipt resting on a dark walnut table with dramatic side lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe7OlwvqjQ5CEaJnVr8D2U4bkaW4Ms6EFS-38vUlkY42r-xpKj3H5AC5FEg11NbMCAjFr7FfpB3LK6240WuGHMfT5I-aEm3PzzMPY6Ux7BH2sYR3lE8wCo7QCmW-DXjh4yCRaMGYZbjl3yjERqdobpNAb6gswgwUEtOVXuDDILGi8bmRMYscwRx6Gfwu1pWtd7gCpNp38JRZEIQw36eKjZFPd_RNPlmajvxIyos5bLnP7UbcBnTX-e8ExSaR2v-vtNA_pJUoaFt9c"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center gap-4">
+<div class="w-16 h-16 rounded-full brass-gradient flex items-center justify-center text-white shadow-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="photo_camera">photo_camera</span>
+</div>
+<span class="font-headline font-bold text-primary tracking-wide">Prendre une photo</span>
+</div>
+</div>
+<!-- Status Chip -->
+<div class="absolute top-4 right-4 bg-primary text-on-primary px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+                    PRÊT
+                </div>
+</div>
+</section>
+<!-- Amount Entry Section -->
+<section class="mb-8">
+<div class="bg-surface-container-low rounded-xl p-6">
+<label class="block text-primary font-headline font-semibold text-sm mb-2 uppercase tracking-wider">Montant (TND)</label>
+<div class="flex items-baseline justify-between border-b-2 border-outline-variant/30 pb-2 focus-within:border-secondary transition-colors">
+<span class="text-4xl font-headline font-extrabold text-primary">124.500</span>
+<span class="text-secondary font-headline font-bold text-xl">TND</span>
+</div>
+<!-- Custom Numeric Keypad (Implicitly represented as UI buttons for this screen) -->
+<div class="grid grid-cols-3 gap-3 mt-6">
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">1</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">2</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">3</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">4</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">5</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">6</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">7</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">8</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">9</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">,</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-primary active:scale-95 transition-transform hover:bg-surface-container">0</button>
+<button class="h-14 bg-surface-container-lowest rounded-lg font-headline font-bold text-xl text-error active:scale-95 transition-transform hover:bg-error/5">
+<span class="material-symbols-outlined">backspace</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Category Picker (Styled as a persistent sheet for mobile efficiency) -->
+<section class="mb-12">
+<h3 class="font-headline font-bold text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="category">category</span>
+                Catégorie
+            </h3>
+<div class="flex flex-wrap gap-3">
+<button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-secondary text-white font-semibold shadow-md ring-2 ring-secondary/20">
+<span class="material-symbols-outlined text-lg" data-icon="restaurant">restaurant</span>
+<span>Repas</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container text-primary font-medium hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="directions_car">directions_car</span>
+<span>Transport</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container text-primary font-medium hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="handyman">handyman</span>
+<span>Matériel</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container text-primary font-medium hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_horiz">more_horiz</span>
+<span>Autre</span>
+</button>
+</div>
+</section>
+<!-- Submit Action -->
+<div class="fixed bottom-24 left-0 w-full px-6 z-40">
+<button class="w-full brass-gradient text-white font-headline font-bold py-4 rounded-xl shadow-xl active:scale-[0.98] transition-transform flex items-center justify-center gap-3">
+<span>Soumettre la dépense</span>
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-2xl bg-[#fbf9f5]/85 dark:bg-slate-900/85 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,54,100,0.05)] border-t border-[#c26b10]/15">
+<div class="flex justify-around items-center w-full px-2 pb-6 pt-2">
+<div class="flex flex-col items-center justify-center text-[#1E4D80] px-4 py-1.5 hover:bg-[#f0eeea] active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-['Inter'] text-[11px] font-medium">Accueil</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1E4D80] px-4 py-1.5 hover:bg-[#f0eeea] active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="event_note">event_note</span>
+<span class="font-['Inter'] text-[11px] font-medium">Planning</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-gradient-to-br from-[#785a00] to-[#745700] text-white rounded-xl px-4 py-1.5 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="photo_camera" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+<span class="font-['Inter'] text-[11px] font-medium">Dépenses</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1E4D80] px-4 py-1.5 hover:bg-[#f0eeea] active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="timer_10_alt_1">timer_10_alt_1</span>
+<span class="font-['Inter'] text-[11px] font-medium">Congés</span>
+</div>
+</div>
+</nav>
+</body></html>

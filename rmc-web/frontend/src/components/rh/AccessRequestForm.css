@@ -1,0 +1,258 @@
+/* ==========================================
+   ACCESS REQUEST FORM — Nautical Architect
+   ========================================== */
+
+/* Modal */
+.access-modal-large {
+  max-width: 700px;
+  width: 95%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.access-form {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Error */
+.access-form .error-message {
+  padding: 10px 14px;
+  background: var(--status-danger-bg);
+  color: var(--status-danger);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+/* Form Sections */
+.access-form .form-section {
+  background: var(--surface-container-low);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.access-form .form-section h3 {
+  margin: 0 0 var(--space-md) 0;
+  font-family: var(--font-headline);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.access-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.access-form .form-group {
+  margin-bottom: var(--space-md);
+}
+
+.access-form .form-group label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--secondary);
+  margin-bottom: 4px;
+  font-family: var(--font-label);
+}
+
+.access-form .form-group input,
+.access-form .form-group textarea,
+.access-form .form-group select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--surface-container-high);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  background: var(--surface-container-lowest);
+  color: var(--on-surface);
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.access-form .form-group input:focus,
+.access-form .form-group textarea:focus,
+.access-form .form-group select:focus {
+  outline: none;
+  border-color: var(--primary-fixed-dim);
+  box-shadow: 0 0 0 3px rgba(30, 77, 128, 0.08);
+}
+
+.access-form .form-group textarea {
+  resize: vertical;
+}
+
+/* Matériels History Chips */
+.materiels-history {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.history-label {
+  font-size: var(--text-xs);
+  color: var(--outline);
+  font-weight: 700;
+}
+.history-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.materiel-chip {
+  padding: 4px 10px;
+  font-size: var(--text-xs);
+  background: var(--primary-fixed);
+  color: var(--primary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  font-weight: 600;
+}
+.materiel-chip:hover {
+  background: var(--primary-fixed-dim);
+}
+
+/* Worker Rows */
+.worker-row, .vehicle-row {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+  padding: var(--space-md);
+  background: var(--surface-container-lowest);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-sm);
+  position: relative;
+}
+
+.worker-number, .vehicle-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--brass-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.worker-fields, .vehicle-fields {
+  flex: 1;
+  min-width: 0;
+}
+
+.employee-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--surface-container-high);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+}
+
+.btn-remove-worker {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  color: var(--outline);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.btn-remove-worker:hover {
+  background: var(--status-danger-bg);
+  color: var(--status-danger);
+}
+
+.btn-add-worker {
+  width: 100%;
+  padding: 10px;
+  border: 2px dashed var(--surface-container-high);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--primary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-add-worker:hover {
+  border-color: var(--primary);
+  background: var(--primary-fixed);
+}
+
+/* Actions */
+.access-form .form-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+  padding-top: var(--space-md);
+}
+
+.access-form .btn-cancel {
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--surface-container);
+  color: var(--on-surface-variant);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.access-form .btn-cancel:hover {
+  background: var(--surface-container-high);
+}
+
+.access-form .btn-submit {
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--brass-gradient);
+  color: white;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-family: var(--font-headline);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(120, 90, 0, 0.2);
+}
+.access-form .btn-submit:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.access-form .btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .access-form .form-row {
+    grid-template-columns: 1fr;
+  }
+  .access-modal-large {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+}

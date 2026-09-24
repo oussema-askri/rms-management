@@ -1,0 +1,303 @@
+/* ==========================================
+   TÂCHES LIST — Nautical Architect
+   ========================================== */
+
+.planning-list {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  gap: var(--space-md);
+}
+
+/* ===== HEADER ===== */
+.planning-list .list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg);
+  background: var(--surface-container-lowest);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.planning-list .list-header h2 {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+}
+
+.planning-list .subtitle {
+  color: var(--outline);
+  margin: 2px 0 0 0;
+  font-size: var(--text-sm);
+}
+
+.planning-list .btn-new {
+  background: var(--brass-gradient);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-family: var(--font-headline);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(120, 90, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.planning-list .btn-new:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* ===== TABLE ===== */
+.planning-list .table-container {
+  background: var(--surface-container-lowest);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+
+.planning-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.planning-table thead {
+  background: var(--surface-container-low);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.planning-table th {
+  padding: 12px 10px;
+  text-align: left;
+  color: var(--secondary);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font-label);
+  white-space: nowrap;
+}
+.planning-table th:last-child { text-align: center; }
+
+.planning-table tbody tr {
+  transition: background var(--transition-fast);
+}
+.planning-table tbody tr:nth-child(even) {
+  background: var(--surface-container-low);
+}
+.planning-table tbody tr:hover {
+  background: var(--surface-container);
+}
+
+.planning-table td {
+  padding: 10px;
+  color: var(--on-surface);
+  font-size: var(--text-sm);
+  vertical-align: middle;
+}
+
+/* ===== CELL STYLES ===== */
+.cell-primary {
+  font-weight: 600;
+  color: var(--on-surface);
+}
+.cell-secondary {
+  font-size: var(--text-xs);
+  color: var(--outline);
+  margin-top: 2px;
+}
+.cell-unit-number {
+  font-size: var(--text-xs);
+  color: var(--primary);
+  font-weight: 700;
+  margin-top: 2px;
+}
+.cell-sous-titre {
+  font-size: 11px;
+  color: var(--status-success);
+  font-weight: 600;
+  margin-top: 4px;
+  padding: 2px 6px;
+  background: var(--status-success-bg);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.cell-description {
+  max-width: 180px;
+  font-size: var(--text-sm);
+  color: var(--on-surface-variant);
+  line-height: 1.4;
+}
+.cell-materials {
+  max-width: 130px;
+  font-size: var(--text-xs);
+  color: var(--outline);
+  /* A comma-separated list with no spaces has no break opportunity, so it
+     overflowed the cell and ran across the next column. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.cell-quantity strong {
+  color: var(--primary);
+  font-family: var(--font-headline);
+}
+.cell-date {
+  font-size: var(--text-sm);
+  color: var(--on-surface-variant);
+  white-space: nowrap;
+}
+
+/* ===== CREATOR BADGE ===== */
+.creator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--primary-fixed);
+  color: var(--primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cell-datetime {
+  font-size: var(--text-xs);
+  color: var(--outline);
+  white-space: nowrap;
+  font-family: var(--font-mono, monospace);
+}
+
+/* ===== STATUS PILLS ===== */
+.status-pill {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.status-pending {
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
+}
+.status-progress {
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+}
+.status-completed {
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+}
+.status-cancelled {
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+}
+
+/* ===== WORKERS INFO ===== */
+.workers-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.workers-count {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-fixed);
+  color: var(--primary);
+  border-radius: 50%;
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+.workers-label {
+  font-size: var(--text-xs);
+  color: var(--outline);
+}
+
+/* ===== ACTION BUTTONS ===== */
+.planning-list .action-buttons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+.planning-list .btn-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--outline);
+}
+.planning-list .btn-action .material-symbols-outlined { font-size: 18px; }
+.planning-list .btn-action.btn-edit:hover {
+  background: var(--primary-fixed);
+  color: var(--primary);
+}
+.planning-list .btn-action.btn-delete:hover {
+  background: var(--status-danger-bg);
+  color: var(--status-danger);
+}
+
+/* ===== EMPTY / LOADING ===== */
+.planning-list .no-data-card {
+  background: var(--surface-container-lowest);
+  padding: var(--space-4xl) var(--space-2xl);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.planning-list .no-data-card p {
+  color: var(--outline);
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-lg) 0;
+}
+.planning-list .btn-create-first {
+  background: var(--brass-gradient);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-base);
+  font-weight: 700;
+  font-family: var(--font-headline);
+  cursor: pointer;
+}
+
+/* ===== SCROLLBAR ===== */
+.planning-list .table-container::-webkit-scrollbar { width: 6px; height: 6px; }
+.planning-list .table-container::-webkit-scrollbar-track { background: var(--surface-container-low); }
+.planning-list .table-container::-webkit-scrollbar-thumb { background: var(--primary-fixed); border-radius: 10px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .planning-list .list-header {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: stretch;
+  }
+  .planning-list .btn-new {
+    width: 100%;
+    justify-content: center;
+  }
+}

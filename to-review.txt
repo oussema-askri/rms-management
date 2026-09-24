@@ -1,0 +1,47 @@
+RMS - Issues To Review
+======================
+All five items below have been decided and applied. Kept as a record of what
+was chosen and why, so the reasoning is not lost.
+
+
+1. CLIENT API RESPONSE FORMAT INCONSISTENCY                          [RESOLVED]
+   File: backend/routes/client.js
+   Was:  returned raw arrays and objects while every other route returned
+         { success, data }. Both clients carried their own fallback logic.
+   Done: every response from this router is now wrapped like the rest. Both
+         clients read responses through a shared unwrap helper
+         (frontend/src/services/unwrap.js, rms-mobile/src/api/unwrap.js) that
+         still accepts a bare payload, so a stale server cannot blank a screen.
+
+
+2. MISSING AUTHORIZATION ON CLIENT UNITES/SOUS-TITRES                [RESOLVED]
+   File: backend/routes/client.js
+   Was:  any authenticated user could add unites and sous-titres.
+   Done: POST /clients, POST /:id/unites and POST /:id/unites/:uniteId/sous-titres
+         now require rh, admin, responsable or comptable. That matches what both
+         interfaces already showed, so no working button was taken away.
+
+
+3. MISSING AUTHORIZATION ON PLANNING CREATE                          [RESOLVED]
+   File: backend/routes/planning.js
+   Was:  any authenticated user could create planning entries.
+   Done: POST /planning requires rh, admin, responsable or comptable. Employers
+         were already not offered the action in either app.
+
+
+4. RESPONSABLE EXCLUDED FROM EMPLOYEE FILTERS                        [RESOLVED]
+   Files: PlanningForm.js, AccessRequestForm.js (web)
+          PlanningFormScreen.js, AccessRequestFormScreen.js (mobile)
+   Was:  these forms filtered to role === 'employer', so a responsable could
+         never be assigned to a task or named on an access permit, even though
+         both planning calendars already listed them.
+   Done: all four now accept employer and responsable, matching the calendars.
+         Decision: responsables work on site and are assignable.
+
+
+5. PLANNINGFORM.js CLIENT DATA SHAPE                                 [RESOLVED]
+   File: frontend/src/components/employer/PlanningForm.js
+   Was:  setClients(response.data), which only worked while the client route
+         returned a raw array.
+   Done: uses unwrapList(), so it is correct under either shape. Resolved
+         together with item 1 as noted.

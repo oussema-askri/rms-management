@@ -1,0 +1,37 @@
+# systemd unit for the RMS API.
+# Install to /etc/systemd/system/rms-api.service
+
+[Unit]
+Description=RMS Management API
+After=network.target mongod.service
+Requires=mongod.service
+
+[Service]
+Type=simple
+User=rms
+Group=rms
+WorkingDirectory=/srv/rms/backend
+
+# No EnvironmentFile here on purpose. server.js calls dotenv.config() itself,
+# which reads ./.env relative to WorkingDirectory. systemd parses env files with
+# different quoting rules than dotenv and chokes on values containing # or
+# special characters, which a 96-character JWT_SECRET can easily contain.
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node server.js
+
+Restart=always
+RestartSec=5
+
+# The app only ever writes to its uploads directory.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/srv/rms/backend/uploads
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rms-api
+
+[Install]
+WantedBy=multi-user.target

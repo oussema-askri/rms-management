@@ -1,0 +1,382 @@
+.pointage-form {
+  max-width: 100%;
+}
+
+.pointage-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.pointage-date-picker label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 6px;
+}
+
+.pointage-date-picker input {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1a2435;
+}
+
+.pointage-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-duplicate {
+  padding: 8px 16px;
+  background: #eef2f8;
+  color: #1e4d80;
+  border: 1px solid #d3e3ff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-duplicate:hover {
+  background: #d3e3ff;
+}
+
+.btn-duplicate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-add-worker {
+  padding: 8px 16px;
+  background: #1e4d80;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add-worker:hover {
+  background: #163c66;
+}
+
+/* Message */
+.pointage-message {
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pointage-message-success {
+  background: #e8f4ee;
+  color: #165a3d;
+  border: 1px solid #b7e4c7;
+}
+
+.pointage-message-error {
+  background: #ffdad6;
+  color: #6e1e1e;
+  border: 1px solid #f5b7b1;
+}
+
+.pointage-message-warning {
+  background: #faf0e6;
+  color: #773f11;
+  border: 1px solid #f0d9b5;
+}
+
+.pointage-message-info {
+  background: #eef2f8;
+  color: #163c66;
+  border: 1px solid #d3e3ff;
+}
+
+/* Stats */
+.pointage-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.pointage-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.stat-number {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.stat-total .stat-number { color: #1e4d80; }
+.stat-present .stat-number { color: #27976a; }
+.stat-late .stat-number { color: #c26b1e; }
+.stat-absent .stat-number { color: #b53535; }
+
+/* Add Worker Dropdown */
+.add-worker-dropdown {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.add-worker-dropdown h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #1a2435;
+}
+
+.employee-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.employee-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f7f8fa;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.employee-option:hover {
+  background: #eef2f8;
+  border-color: #1e4d80;
+}
+
+.emp-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a2435;
+}
+
+.emp-type {
+  font-size: 11px;
+  color: #6b7280;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.no-employees {
+  color: #6b7280;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Loading & Empty */
+.pointage-loading,
+.pointage-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.pointage-empty p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+/* Table */
+.pointage-table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.pointage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.pointage-table th {
+  text-align: left;
+  padding: 12px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #eee;
+  white-space: nowrap;
+}
+
+.pointage-table td {
+  padding: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.entry-row.entry-absent {
+  background: #fff5f5;
+}
+
+.entry-row.entry-late {
+  background: #fffbeb;
+}
+
+.entry-worker {
+  min-width: 120px;
+}
+
+.worker-name {
+  font-weight: 600;
+  color: #1a2435;
+}
+
+/* Status Buttons */
+.status-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.status-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid #e2e8f0;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #fff;
+  color: #6b7280;
+}
+
+.status-btn.status-present.active {
+  background: #27976a;
+  border-color: #27976a;
+  color: #fff;
+}
+
+.status-btn.status-late.active {
+  background: #c26b1e;
+  border-color: #c26b1e;
+  color: #fff;
+}
+
+.status-btn.status-absent.active {
+  background: #b53535;
+  border-color: #b53535;
+  color: #fff;
+}
+
+.status-btn:hover {
+  border-color: #999;
+}
+
+.absent-reason {
+  margin-top: 6px;
+  padding: 4px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  width: 100%;
+  max-width: 160px;
+}
+
+.entry-input {
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  width: 100%;
+  min-width: 80px;
+  max-width: 160px;
+}
+
+.entry-input:focus,
+.absent-reason:focus {
+  outline: none;
+  border-color: #1e4d80;
+  box-shadow: 0 0 0 2px rgba(30,77,128,0.1);
+}
+
+.btn-remove-entry {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: #fee;
+  color: #b53535;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btn-remove-entry:hover {
+  background: #fdd;
+}
+
+/* Save Section */
+.pointage-save-section {
+  margin-top: 16px;
+  text-align: right;
+}
+
+.btn-save-pointage {
+  padding: 12px 32px;
+  background: #1e4d80;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-save-pointage:hover {
+  background: #163c66;
+}
+
+.btn-save-pointage:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-save-pointage.saved {
+  background: #27976a;
+}

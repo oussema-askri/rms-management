@@ -1,0 +1,7 @@
+/* Import Professional Component Styles */
+@import './styles/components.css';
+
+.App {
+  min-height: calc(100vh / var(--app-zoom));
+  background-color: var(--surface);
+}

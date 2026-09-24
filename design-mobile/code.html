@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestion Navale - Tableau de bord</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "surface-tint": "#356094",
+                        "secondary-container": "#fece5c",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#f2f0ec",
+                        "on-surface-variant": "#42474f",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f2ae68",
+                        "background": "#fbf9f5",
+                        "on-secondary-fixed": "#251a00",
+                        "secondary": "#785a00",
+                        "secondary-fixed": "#ffdf9c",
+                        "tertiary-container": "#704000",
+                        "surface-container-highest": "#e4e2de",
+                        "inverse-primary": "#a3c9ff",
+                        "on-tertiary-fixed": "#2c1600",
+                        "surface-dim": "#dbdad6",
+                        "surface-container": "#f0eeea",
+                        "primary-container": "#1e4d80",
+                        "primary-fixed-dim": "#a3c9ff",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#eae8e4",
+                        "tertiary-fixed-dim": "#feb871",
+                        "outline-variant": "#c2c6d0",
+                        "error": "#ba1a1a",
+                        "outline": "#737780",
+                        "primary": "#003664",
+                        "inverse-surface": "#30312e",
+                        "tertiary-fixed": "#ffdcbe",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#17487b",
+                        "on-primary-fixed": "#001c39",
+                        "on-background": "#1b1c1a",
+                        "secondary-fixed-dim": "#efc050",
+                        "surface-bright": "#fbf9f5",
+                        "surface-variant": "#e4e2de",
+                        "tertiary": "#502c00",
+                        "on-primary-container": "#95bff9",
+                        "on-secondary-container": "#745700",
+                        "surface-container-low": "#f5f3ef",
+                        "primary-fixed": "#d3e3ff",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "on-secondary": "#ffffff",
+                        "surface": "#fbf9f5",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1b1c1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #fbf9f5; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .brass-gradient {
+            background: linear-gradient(135deg, #785a00 0%, #745700 100%);
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface antialiased pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fbf9f5] dark:bg-slate-950/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,54,100,0.08)] flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden ring-2 ring-primary/10">
+<img alt="Profil utilisateur" class="w-full h-full object-cover" data-alt="portrait of a professional maritime engineer with a short beard and confident expression in a bright industrial office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIzmILplFJQp6ZENiyfzpgVFXlwNHrthozMAFZicvEi2T7_-WQAq8CK9wGSVkhrtfcaBFm12C6TCCpiUPbeOG9hQV4gy0vP6Kc7Fv1qPRmYBuAyK0-q8iQyDsFUTFTUmFzrwD1oHbfmbARH2rjH8uDfIEymVo3C12Dp-ZjtJRRvS8zQ99LbZhOqiBLx0g-x29aNk71jKbm-_LrdSvGrdYnfxmldrKJGlxVkwXy_e92GMwF6RUIUinOsYCwS516J3KqT2Q1KmRwOmQ"/>
+</div>
+<span class="font-['Manrope'] font-bold text-[#003664] dark:text-white">Gestion Navale</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#003664] dark:text-[#70a1ff]" data-icon="badge">badge</span>
+</div>
+</header>
+<main class="mt-20 px-6">
+<!-- Welcome Header -->
+<section class="mb-8">
+<div class="flex items-center justify-between mb-1">
+<h1 class="font-headline text-3xl font-extrabold text-primary tracking-tight">Bonjour, Amine</h1>
+</div>
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold uppercase tracking-widest">
+                Responsable
+            </span>
+</section>
+<!-- Horizontal Scroll Stats -->
+<section class="mb-10 -mx-6">
+<div class="flex overflow-x-auto hide-scrollbar px-6 space-x-4">
+<!-- Stat Card 1 -->
+<div class="flex-none w-64 p-5 rounded-xl bg-primary-container text-on-primary-container shadow-[0_8px_24px_rgba(0,54,100,0.08)]">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined opacity-80" data-icon="assignment">assignment</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter opacity-70">Aujourd'hui</span>
+</div>
+<div class="text-4xl font-headline font-extrabold text-white mb-1">08</div>
+<div class="text-sm font-medium text-white/80">Tâches du jour</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="flex-none w-64 p-5 rounded-xl bg-surface-container-high border border-outline-variant/15">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-secondary" data-icon="event_available">event_available</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant opacity-70">Disponibilité</span>
+</div>
+<div class="text-4xl font-headline font-extrabold text-primary mb-1">14.5</div>
+<div class="text-sm font-medium text-on-surface-variant">Solde de congés (jours)</div>
+</div>
+</div>
+</section>
+<!-- Quick Actions Grid -->
+<section class="mb-10">
+<h2 class="font-headline text-lg font-bold text-primary mb-5 px-1">Actions Rapides</h2>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-start p-4 bg-surface-container-low rounded-xl active:scale-95 transition-transform">
+<div class="w-10 h-10 rounded-lg brass-gradient flex items-center justify-center text-white mb-3">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</div>
+<span class="text-sm font-semibold text-primary">Nouvelle Dépense</span>
+</button>
+<button class="flex flex-col items-start p-4 bg-surface-container-low rounded-xl active:scale-95 transition-transform">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white mb-3">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+</div>
+<span class="text-sm font-semibold text-primary">Planning</span>
+</button>
+<button class="flex flex-col items-start p-4 bg-surface-container-low rounded-xl active:scale-95 transition-transform">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container mb-3">
+<span class="material-symbols-outlined" data-icon="vpn_key">vpn_key</span>
+</div>
+<span class="text-sm font-semibold text-primary">Demande d'accès</span>
+</button>
+<button class="flex flex-col items-start p-4 bg-surface-container-low rounded-xl active:scale-95 transition-transform">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary mb-3">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+</div>
+<span class="text-sm font-semibold text-primary">Mes Rapports</span>
+</button>
+</div>
+</section>
+<!-- Tasks Section -->
+<section class="mb-8">
+<div class="flex items-center justify-between mb-6 px-1">
+<h2 class="font-headline text-lg font-bold text-primary">Tâches d'aujourd'hui</h2>
+<button class="text-xs font-bold text-secondary uppercase tracking-widest">Voir tout</button>
+</div>
+<div class="space-y-4">
+<!-- Task Card 1 -->
+<div class="p-5 rounded-xl bg-surface-container-lowest shadow-[0_4px_12px_rgba(0,54,100,0.04)] border-l-4 border-secondary">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-bold text-primary">Inspection Coque V14</h3>
+<p class="text-xs text-on-surface-variant font-medium">Navire: CMA CGM MARCO POLO</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider">
+                            En cours
+                        </span>
+</div>
+<div class="flex items-center gap-2 mt-4">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="schedule">schedule</span>
+<span class="text-xs text-outline font-medium">08:30 - 12:00</span>
+</div>
+</div>
+<!-- Task Card 2 -->
+<div class="p-5 rounded-xl bg-surface-container-low">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-bold text-primary">Maintenance Moteur B-02</h3>
+<p class="text-xs text-on-surface-variant font-medium">Client: Port Autonome du Havre</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">
+                            En attente
+                        </span>
+</div>
+<div class="flex items-center gap-2 mt-4">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="schedule">schedule</span>
+<span class="text-xs text-outline font-medium">14:00 - 17:30</span>
+</div>
+</div>
+<!-- Task Card 3 -->
+<div class="p-5 rounded-xl bg-surface-container-low opacity-80">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-bold text-primary opacity-60">Réparation Système Radar</h3>
+<p class="text-xs text-on-surface-variant font-medium">Navire: L'Austral</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">
+                            En attente
+                        </span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-2 pb-6 bg-[#fbf9f5]/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-t-[16px] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-[#c26b10]/15">
+<button class="flex flex-col items-center justify-center bg-gradient-to-br from-[#785a00] to-[#745700] text-white rounded-xl px-4 py-1.5 transition-all duration-300 ease-out">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider">Accueil</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#003664] dark:text-slate-400 opacity-60 hover:opacity-100 transition-all duration-300 ease-out">
+<span class="material-symbols-outlined mb-1" data-icon="calendar_today">calendar_today</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider">Planning</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#003664] dark:text-slate-400 opacity-60 hover:opacity-100 transition-all duration-300 ease-out">
+<span class="material-symbols-outlined mb-1" data-icon="payments">payments</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider">Dépenses</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#003664] dark:text-slate-400 opacity-60 hover:opacity-100 transition-all duration-300 ease-out">
+<span class="material-symbols-outlined mb-1" data-icon="menu">menu</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider">Menu</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,51 @@
+/* ==========================================
+   EXPENSE FORM — Nautical Architect
+   ========================================== */
+
+.expense-form {
+  padding: var(--space-xl);
+}
+
+.expense-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.expense-form .file-input {
+  padding: var(--space-sm);
+  border: 2px dashed var(--outline-variant);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.expense-form .file-input:hover {
+  border-color: var(--secondary);
+}
+
+.expense-form .file-preview {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--surface-container-low);
+  border-radius: var(--radius-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.expense-form .file-preview span {
+  font-size: var(--text-sm);
+  color: var(--on-surface);
+}
+
+.expense-form .file-size {
+  color: var(--outline);
+  font-size: var(--text-xs);
+}
+
+@media (max-width: 600px) {
+  .expense-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}

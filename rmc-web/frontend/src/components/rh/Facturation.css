@@ -1,0 +1,507 @@
+/* =============================================
+   FACTURATION PAGE — Nautical Architect
+   ============================================= */
+
+/* ── Invoice metadata form ────────────────── */
+.fact-meta-form {
+  background: var(--surface-container-lowest);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.fact-meta-row {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.fact-meta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.fact-meta-group label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font-label);
+}
+
+.fact-meta-group.required label::after {
+  content: ' *';
+  color: var(--error);
+}
+
+.fact-meta-group input {
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 2px solid var(--outline-variant);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  outline: none;
+  color: var(--on-surface);
+  background: var(--surface-container-high);
+  transition: all var(--transition-fast);
+}
+
+.fact-meta-group input:focus {
+  border-bottom-color: var(--secondary);
+  box-shadow: 0 2px 0 0 var(--secondary);
+}
+
+.fact-meta-group.required input {
+  border-bottom-color: var(--primary-fixed-dim);
+}
+
+.fact-meta-group.required input:focus {
+  border-bottom-color: var(--secondary);
+}
+
+/* ── Amount in words preview ──────────────── */
+.fact-words-preview {
+  margin-top: var(--space-md);
+  padding: 10px 16px;
+  background: var(--status-info-bg);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: var(--text-sm);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.fact-words-label {
+  font-weight: 700;
+  color: var(--on-surface);
+  white-space: nowrap;
+}
+
+.fact-words-value {
+  color: var(--primary);
+  font-weight: 700;
+  font-style: italic;
+}
+
+.facturation-page {
+  padding: 4px 0 40px;
+}
+
+/* ── Section header ───────────────────────── */
+.fact-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.fact-section-header h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-headline);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.fact-hint {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--outline);
+}
+
+.fact-step1-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Buttons ──────────────────────────────── */
+.btn-fact-primary {
+  background: var(--brass-gradient);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-family: var(--font-headline);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(120, 90, 0, 0.2);
+}
+
+.btn-fact-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-fact-primary:disabled {
+  background: var(--surface-container-high);
+  color: var(--outline);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-fact-secondary {
+  background: var(--surface-container-lowest);
+  color: var(--on-surface-variant);
+  border: 1.5px solid var(--outline-variant);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-fact-secondary:hover {
+  background: var(--surface-container-low);
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+.btn-fact-download {
+  background: var(--gradient-success);
+  color: white;
+}
+
+.btn-fact-download:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* ── Search bar ───────────────────────────── */
+.fact-search-bar {
+  margin-bottom: var(--space-lg);
+}
+
+.fact-search-bar .search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 2px solid var(--outline-variant);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  outline: none;
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.fact-search-bar .search-input:focus {
+  border-bottom-color: var(--secondary);
+  background: var(--surface-container-lowest);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── BDR card grid ────────────────────────── */
+.fact-bon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.fact-bon-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: 14px 16px;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--surface-container-low);
+  user-select: none;
+}
+
+.fact-bon-card:hover {
+  background: var(--surface-container);
+  box-shadow: var(--shadow-xs);
+}
+
+.fact-bon-card.selected {
+  background: var(--primary-fixed);
+  box-shadow: var(--shadow-sm);
+}
+
+.fact-checkbox {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border: 2px solid var(--outline-variant);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: transparent;
+  margin-top: 2px;
+  transition: all var(--transition-fast);
+}
+
+.fact-checkbox.checked {
+  background: var(--primary-container);
+  border-color: var(--primary-container);
+  color: white;
+}
+
+.fact-bon-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fact-bon-number {
+  font-family: var(--font-headline);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 2px;
+}
+
+.fact-bon-client {
+  font-size: var(--text-sm);
+  color: var(--on-surface-variant);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fact-bon-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fact-bon-unite {
+  font-size: var(--text-xs);
+  background: var(--primary-fixed);
+  color: var(--primary);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+}
+
+.fact-bon-taches {
+  font-size: var(--text-xs);
+  color: var(--outline);
+}
+
+.fact-bon-status {
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+/* ── Sticky confirmation bar ─────────────── */
+.fact-sticky-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--primary);
+  color: var(--on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-lg);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  z-index: 10;
+}
+
+.fact-sticky-bar .btn-fact-primary {
+  background: var(--brass-gradient);
+  color: white;
+}
+
+.fact-sticky-bar .btn-fact-primary:hover {
+  opacity: 0.9;
+}
+
+/* ── Facturation table ───────────────────── */
+.fact-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.fact-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+  background: var(--surface-container-lowest);
+}
+
+.fact-table thead th {
+  background: var(--surface-container-low);
+  color: var(--secondary);
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-family: var(--font-label);
+}
+
+.fact-table thead th.col-num,
+.fact-table thead th.col-price {
+  text-align: center;
+}
+
+.fact-table tbody tr {
+  transition: background var(--transition-fast);
+}
+.fact-table tbody tr:nth-child(even) {
+  background: var(--surface-container-low);
+}
+
+.fact-table tbody tr:hover {
+  background: var(--surface-container);
+}
+
+.fact-table tbody tr.row-priced {
+  background: var(--status-success-bg);
+}
+
+.fact-table tbody tr.row-priced:hover {
+  background: var(--status-success-bg);
+}
+
+.fact-table td {
+  padding: 11px 14px;
+  font-size: var(--text-sm);
+  color: var(--on-surface);
+  vertical-align: middle;
+}
+
+.fact-table td.cell-center {
+  text-align: center;
+}
+
+.fact-table td.cell-muted {
+  color: var(--outline);
+  font-size: var(--text-xs);
+}
+
+.fact-table td.col-num {
+  text-align: center;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.fact-table td.col-price {
+  text-align: center;
+}
+
+/* Bon number badge */
+.fact-bon-num-badge {
+  display: inline-block;
+  background: var(--primary-fixed);
+  color: var(--primary);
+  padding: 3px 8px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Description cells */
+.fact-desc-primary {
+  font-weight: 600;
+  color: var(--on-surface);
+  font-size: var(--text-sm);
+}
+
+.fact-desc-secondary {
+  color: var(--outline);
+  font-size: var(--text-xs);
+  margin-top: 2px;
+}
+
+.fact-desc-mat {
+  color: var(--outline);
+  font-size: var(--text-xs);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+/* Price input */
+.fact-price-input {
+  width: 110px;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 2px solid var(--outline-variant);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  font-size: var(--text-sm);
+  text-align: right;
+  outline: none;
+  background: var(--surface-container-high);
+  transition: all var(--transition-fast);
+  color: var(--on-surface);
+  font-weight: 600;
+}
+
+.fact-price-input:focus {
+  border-bottom-color: var(--secondary);
+  box-shadow: 0 2px 0 0 var(--secondary);
+}
+
+/* Prix T HT value */
+.fact-prix-t {
+  font-size: var(--text-sm);
+  color: var(--outline);
+  font-weight: 500;
+  display: inline-block;
+  min-width: 80px;
+  text-align: right;
+}
+
+.fact-prix-t.has-value {
+  color: var(--status-success);
+  font-weight: 700;
+}
+
+/* Total row */
+.fact-total-row {
+  background: var(--primary) !important;
+}
+
+.fact-total-row td {
+  color: white !important;
+  font-weight: 700;
+  padding: 14px 16px;
+  font-size: var(--text-base);
+}
+
+.fact-total-label {
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+
+.fact-total-value {
+  text-align: center;
+  font-size: var(--text-lg);
+  letter-spacing: 0.01em;
+}

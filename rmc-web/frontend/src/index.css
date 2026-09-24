@@ -1,0 +1,30 @@
+/* Import Professional Design System */
+@import './styles/design-system.css';
+
+/* Render the whole app at 80% scale so a browser at 100% shows what 80% used
+   to show. The stylesheets are overwhelmingly hardcoded px (about 1200 of them
+   against 29 rem values), so scaling the root font size would have moved almost
+   nothing. `zoom` scales every length and, unlike transform: scale(), it reflows
+   the layout, so widths and scrollbars stay correct. */
+:root {
+  --app-zoom: 0.8;
+}
+
+html {
+  zoom: var(--app-zoom);
+}
+
+
+/* Root App Shell */
+#root {
+  min-height: calc(100vh / var(--app-zoom));
+  background-color: var(--surface);
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--surface-container-high);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}

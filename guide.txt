@@ -1,0 +1,416 @@
+================================================================
+  RMS DEPLOYMENT GUIDE - Frontend, Backend & Mobile APK
+================================================================
+
+This guide covers deploying the full RMS stack for free:
+  - Backend (Express + MongoDB) -> Render.com (free tier)
+  - Frontend (React)            -> Vercel (free tier)
+  - Database (MongoDB)          -> MongoDB Atlas (free tier)
+  - Mobile APK (Expo)           -> EAS Build (free tier)
+
+
+================================================================
+  PART 1: DATABASE - MongoDB Atlas (Free Forever - 512MB)
+================================================================
+
+1. Go to https://www.mongodb.com/atlas and create a free account
+
+2. Create a new cluster:
+   - Click "Build a Database"
+   - Choose "M0 FREE" tier
+   - Select region closest to you (e.g., Europe - Paris)
+   - Name your cluster (e.g., "rms-cluster")
+   - Click "Create Deployment"
+
+3. Create a database user:
+   - Username: rmsadmin
+   - Password: (choose a strong password, save it)
+   - Click "Create User"
+
+4. Set up network access:
+   - Go to "Network Access" in the left sidebar
+   - Click "Add IP Address"
+   - Click "Allow Access from Anywhere" (0.0.0.0/0)
+     (Required for Render to connect)
+   - Click "Confirm"
+
+5. Get your connection string:
+   - Go to "Database" in the left sidebar
+   - Click "Connect" on your cluster
+   - Choose "Drivers"
+   - Copy the connection string, it looks like:
+     mongodb+srv://rmsadmin:<password>@rms-cluster.xxxxx.mongodb.net/?retryWrites=true&w=majority
+   - Replace <password> with your actual password
+   - Add your database name before the "?":
+     mongodb+srv://rmsadmin:YOUR_PASSWORD@rms-cluster.xxxxx.mongodb.net/rms_db?retryWrites=true&w=majority
+
+   SAVE THIS STRING - you'll need it for the backend deployment.
+
+
+================================================================
+  PART 2: BACKEND - Render.com (Free Tier)
+================================================================
+
+STEP A: Prepare the backend code
+---------------------------------
+
+1. Create a file called "render.yaml" in the backend folder (rmc-web/backend/):
+   (This is optional but helps)
+
+2. Make sure your backend/package.json has a "start" script:
+   "scripts": {
+     "start": "node server.js"
+   }
+
+3. Create a ".env.example" file in backend/ for reference:
+   PORT=5000
+   MONGO_URI=mongodb+srv://...
+   JWT_SECRET=your_jwt_secret_here
+
+4. Make sure server.js uses process.env.PORT (it already does):
+   const PORT = process.env.PORT || 5000;
+
+5. IMPORTANT: Update your CORS in server.js for production:
+   Replace:   app.use(cors());
+   With:      app.use(cors({
+                origin: ['http://localhost:3000', 'https://YOUR-FRONTEND-URL.vercel.app'],
+                credentials: true
+              }));
+   (You'll update the Vercel URL after deploying the frontend)
+
+
+STEP B: Push to GitHub
+-----------------------
+
+1. Create a GitHub account if you don't have one: https://github.com
+
+2. Create a NEW repository on GitHub:
+   - Go to https://github.com/new
+   - Name: "rms-backend" (or whatever you prefer)
+   - Set to Private
+   - Don't initialize with README
+   - Click "Create repository"
+
+3. In your terminal, navigate to the backend folder:
+   cd C:\Users\user\Desktop\rms\RMS\rmc-web\backend
+
+4. Initialize git and push:
+   git init
+   git add .
+   git commit -m "Initial backend deployment"
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/rms-backend.git
+   git push -u origin main
+
+   IMPORTANT: Make sure .env is in your .gitignore file!
+   Create a .gitignore file if it doesn't exist with:
+     node_modules
+     .env
+     uploads/
+
+
+STEP C: Deploy on Render
+-------------------------
+
+1. Go to https://render.com and sign up (use GitHub login)
+
+2. Click "New" -> "Web Service"
+
+3. Connect your GitHub repository "rms-backend"
+
+4. Configure the service:
+   - Name: rms-backend
+   - Region: Frankfurt (EU) or closest to you
+   - Branch: main
+   - Runtime: Node
+   - Build Command: npm install
+   - Start Command: node server.js
+   - Instance Type: Free
+
+5. Add Environment Variables (click "Add Environment Variable"):
+   - MONGO_URI = (your MongoDB Atlas connection string from Part 1)
+   - JWT_SECRET = (any long random string, e.g., "rms_jwt_secret_2024_xK9mP2")
+   - PORT = 5000
+   - NODE_ENV = production
+
+6. Click "Create Web Service"
+
+7. Wait for the build to complete (2-5 minutes)
+
+8. Your backend URL will be something like:
+   https://rms-backend-xxxx.onrender.com
+
+   SAVE THIS URL - you'll need it for the frontend.
+
+NOTE: Render free tier sleeps after 15 min of inactivity.
+      First request after sleep takes ~30 seconds to wake up.
+      This is normal for free tier.
+
+
+================================================================
+  PART 3: FRONTEND - Vercel (Free Tier)
+================================================================
+
+STEP A: Prepare the frontend code
+-----------------------------------
+
+1. Update the API URL in your frontend.
+   Open: rmc-web/frontend/src/services/api.js
+
+   Replace:
+     const API_URL = 'http://localhost:5000/api';
+
+   With:
+     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+   This lets you set the URL via environment variable in production
+   while keeping localhost for development.
+
+
+STEP B: Push to GitHub
+-----------------------
+
+1. Create another GitHub repository:
+   - Name: "rms-frontend"
+   - Private
+   - Don't initialize
+
+2. In terminal:
+   cd C:\Users\user\Desktop\rms\RMS\rmc-web\frontend
+
+3. Make sure you have a .gitignore with:
+     node_modules
+     build
+     .env
+
+4. Push:
+   git init
+   git add .
+   git commit -m "Initial frontend deployment"
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/rms-frontend.git
+   git push -u origin main
+
+
+STEP C: Deploy on Vercel
+-------------------------
+
+1. Go to https://vercel.com and sign up (use GitHub login)
+
+2. Click "Add New" -> "Project"
+
+3. Import your "rms-frontend" repository
+
+4. Configure:
+   - Framework Preset: Create React App
+   - Root Directory: ./ (leave default)
+   - Build Command: npm run build (default)
+   - Output Directory: build (default)
+
+5. Add Environment Variable:
+   - Key: REACT_APP_API_URL
+   - Value: https://rms-backend-xxxx.onrender.com/api
+     (Use your actual Render backend URL from Part 2, with /api at the end)
+
+6. Click "Deploy"
+
+7. Wait for build to complete (1-3 minutes)
+
+8. Your frontend will be live at:
+   https://rms-frontend-xxxx.vercel.app
+
+9. IMPORTANT: Go back to Render dashboard and update your backend
+   CORS settings with this Vercel URL (see Part 2, Step A, point 5)
+
+
+================================================================
+  PART 4: MOBILE APK - Expo EAS Build
+================================================================
+
+STEP A: Prerequisites
+----------------------
+
+1. Install EAS CLI globally:
+   npm install -g eas-cli
+
+2. Create an Expo account if you don't have one:
+   Go to https://expo.dev and sign up
+
+3. Login to EAS from terminal:
+   eas login
+
+
+STEP B: Update the mobile API URL
+-----------------------------------
+
+1. Open: rms-mobile/src/constants/config.js
+
+2. Update the API URL:
+   export const API_BASE_URL = __DEV__
+     ? 'http://<votre-IP-locale>:5000/api  (voir rms-mobile/.env.example)'    // Your local IP for development
+     : 'https://rms-backend-xxxx.onrender.com/api';  // Your Render URL
+
+   This way:
+   - Development (Expo Go) uses your local backend
+   - Production (APK) uses the deployed backend
+
+
+STEP C: Configure EAS Build
+-----------------------------
+
+1. Navigate to the mobile app folder:
+   cd C:\Users\user\Desktop\rms\RMS\rms-mobile
+
+2. Initialize EAS in your project:
+   eas build:configure
+
+   This creates an eas.json file. Replace its content with:
+
+   {
+     "cli": {
+       "version": ">= 5.0.0"
+     },
+     "build": {
+       "preview": {
+         "distribution": "internal",
+         "android": {
+           "buildType": "apk"
+         }
+       },
+       "production": {
+         "android": {
+           "buildType": "apk"
+         }
+       }
+     }
+   }
+
+3. Make sure your app.json (or app.config.js) has:
+   {
+     "expo": {
+       "name": "RMS",
+       "slug": "rms-mobile",
+       "version": "1.0.0",
+       "android": {
+         "package": "com.rms.mobile",
+         "adaptiveIcon": {
+           "foregroundImage": "./assets/adaptive-icon.png",
+           "backgroundColor": "#003664"
+         }
+       }
+     }
+   }
+
+
+STEP D: Build the APK
+-----------------------
+
+1. Run the build command:
+   eas build --platform android --profile preview
+
+2. EAS will:
+   - Upload your project to Expo servers
+   - Build the APK in the cloud (takes 5-15 minutes)
+   - Give you a download link when done
+
+3. You'll see output like:
+   Build complete!
+   https://expo.dev/artifacts/eas/xxxxx.apk
+
+4. Download the APK from that link
+
+5. Transfer the APK to your Android phone and install it
+   (You may need to enable "Install from unknown sources" in settings)
+
+NOTE: EAS free tier gives you 30 builds per month, which is plenty.
+
+
+================================================================
+  PART 5: POST-DEPLOYMENT CHECKLIST
+================================================================
+
+After everything is deployed, verify:
+
+[ ] 1. Open your Vercel frontend URL in a browser
+[ ] 2. Try logging in with an existing account
+[ ] 3. Check that all pages load (planning, clients, expenses, etc.)
+[ ] 4. Install the APK on your phone
+[ ] 5. Login on the mobile app
+[ ] 6. Verify data is the same on web and mobile
+
+If the backend is sleeping (first load is slow):
+  - This is normal on Render free tier
+  - Wait 30 seconds and refresh
+  - Consider upgrading to Render paid ($7/mo) if this is a problem
+
+
+================================================================
+  PART 6: UPDATING AFTER CHANGES
+================================================================
+
+When you make code changes and want to redeploy:
+
+BACKEND:
+  cd backend
+  git add .
+  git commit -m "your changes"
+  git push
+  -> Render auto-deploys from GitHub
+
+FRONTEND:
+  cd frontend
+  git add .
+  git commit -m "your changes"
+  git push
+  -> Vercel auto-deploys from GitHub
+
+MOBILE APK:
+  cd rms-mobile
+  eas build --platform android --profile preview
+  -> Download new APK and install
+
+
+================================================================
+  TROUBLESHOOTING
+================================================================
+
+Problem: "Network Error" on frontend or mobile
+  -> Check that REACT_APP_API_URL / API_BASE_URL points to correct Render URL
+  -> Check Render backend logs for errors
+  -> Make sure CORS includes your frontend URL
+
+Problem: "MongoDB connection failed" in Render logs
+  -> Check MONGO_URI is correct in Render environment variables
+  -> Check MongoDB Atlas Network Access allows 0.0.0.0/0
+
+Problem: Backend returns 503 / takes long to respond
+  -> Render free tier sleeps after 15min inactivity
+  -> First request wakes it up (takes ~30s)
+  -> Subsequent requests are fast
+
+Problem: APK build fails
+  -> Run "npx expo-doctor" to check for issues
+  -> Make sure app.json has valid "android.package" field
+  -> Check EAS build logs at https://expo.dev
+
+Problem: Images/uploads not showing in production
+  -> Render free tier has ephemeral storage (files are lost on redeploy)
+  -> For persistent file storage, use Cloudinary (free tier) or AWS S3
+  -> This requires code changes to upload to cloud instead of local disk
+
+
+================================================================
+  COST SUMMARY
+================================================================
+
+  MongoDB Atlas M0    : FREE (512MB storage, shared cluster)
+  Render Free         : FREE (750 hours/month, sleeps after 15min)
+  Vercel Free         : FREE (100GB bandwidth, auto-deploys)
+  EAS Build Free      : FREE (30 builds/month)
+  ---------------------------------------------------------------
+  TOTAL               : $0/month
+
+  For better performance (no sleep, faster builds):
+  Render Starter      : $7/month (always on)
+  Everything else     : stays free
+================================================================
