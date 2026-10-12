@@ -3,8 +3,10 @@
    Maritime Industrial B2B — Premium & Efficient
    ========================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+/* Fonts are self-hosted (see fonts.css) so the UI never depends on
+   reaching Google Fonts -- an ad/privacy blocker or network filter
+   there was leaving icons rendered as raw ligature text. */
+@import './fonts.css';
 
 :root {
   /* ===== SURFACE HIERARCHY (M3 Tonal System) ===== */

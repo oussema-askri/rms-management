@@ -13,7 +13,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://rms.example.tn/api"
+        "EXPO_PUBLIC_API_URL": "https://162-35-19-90.sslip.io/api"
       }
     },
     "production": {
@@ -22,7 +22,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://rms.example.tn/api"
+        "EXPO_PUBLIC_API_URL": "https://rms.tn/api"
       }
     }
   },

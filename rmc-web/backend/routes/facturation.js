@@ -4,6 +4,7 @@ const { protect, authorize } = require('../middleware/auth');
 const generateFacturationDocument = require('../utils/generateFacturationDocument');
 const Facture = require('../models/Facture');
 const BonDeReception = require('../models/BonDeReception');
+const mongoose = require('mongoose');
 
 // GET /api/facturation
 // Fetch all generated invoices
@@ -50,14 +51,38 @@ router.post('/', protect, authorize('rh', 'admin', 'comptable'), async (req, res
       normalisedItems.reduce((sum, item) => sum + item.prixTHT, 0) * 1000
     ) / 1000;
 
-    const bons = Array.isArray(bonIds) ? bonIds.filter(Boolean) : [];
+    // De-duplicate: a bon sent twice would make the existence count below
+    // (selected.length !== bons.length) reject an otherwise valid request.
+    const bons = [...new Set((Array.isArray(bonIds) ? bonIds : []).filter(Boolean).map(String))];
 
-    // Check if any of these bons are already billed. `$in: undefined` throws,
-    // so the list has to be normalised before the query.
+    // Fetched once and checked three ways rather than one query each.
     if (bons.length > 0) {
-      const existingBons = await BonDeReception.find({ _id: { $in: bons }, facture: { $ne: null } });
-      if (existingBons.length > 0) {
+      // A non-ObjectId would make the $in query throw a CastError and fall
+      // through to the generic 500; reject it as a bad request up front.
+      if (bons.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+        return res.status(400).json({ message: 'Identifiant de bon invalide.' });
+      }
+
+      const selected = await BonDeReception.find({ _id: { $in: bons } })
+        .select('bonNumber status facture');
+
+      if (selected.length !== bons.length) {
+        return res.status(400).json({ message: 'Un ou plusieurs bons sont introuvables.' });
+      }
+
+      if (selected.some((b) => b.facture != null)) {
         return res.status(400).json({ message: 'Un ou plusieurs bons ont déjà été facturés.' });
+      }
+
+      // An unsigned bon is still open: tâches can go on being added to it after
+      // the invoice is raised, and that later work is then never billable,
+      // because the bon already carries a facture reference and so is refused
+      // by the already-billed check above. Only a signed bon is final.
+      const unsigned = selected.filter((b) => b.status !== 'signed');
+      if (unsigned.length > 0) {
+        return res.status(400).json({
+          message: `Seuls les bons signés peuvent être facturés. Non signé(s): ${unsigned.map((b) => b.bonNumber).join(', ')}.`,
+        });
       }
     }
 

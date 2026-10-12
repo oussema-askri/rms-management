@@ -241,8 +241,14 @@ router.put('/employees/:id', protect, authorize('rh', 'admin', 'responsable'), u
       employee.role = req.body.role;
     }
 
+    // A field a role cannot READ must not be writable by that role either.
+    // fieldsFor() strips `cnss` for a responsable, so their edit form renders
+    // the value they were never sent as an empty input and submits cnss: "".
+    // That is `!== undefined`, so it passed the check below and overwrote a
+    // real CNSS number with a blank every time a responsable saved any
+    // unrelated change, such as a phone number.
     const allowedFields = req.user.role === 'responsable'
-      ? ['name', 'phone', 'address', 'cnss', 'etatSocial', 'employeeType']
+      ? ['name', 'phone', 'address', 'etatSocial', 'employeeType']
       : ['name', 'phone', 'address', 'cnss', 'etatSocial', 'salary', 'dailyRate', 'employeeType'];
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
@@ -579,13 +585,18 @@ router.delete('/access-requests/:id', protect, authorize('rh', 'admin', 'respons
 
 const ANNUAL_CONGE_DAYS = 18;
 
-const calcSolde = async (employeeId) => {
-  const year = new Date().getUTCFullYear();
-  const approved = await CongeRequest.find({
+// `year` is explicit because the entitlement is per calendar year, keyed on a
+// request's startDate. The approval check must measure against the year the
+// request falls in -- approving a December request in January has to count
+// December's usage, not the near-empty new year's. The display endpoints pass
+// no year and get the current one.
+const calcSolde = async (employeeId, year = new Date().getUTCFullYear()) => {
+  const query = {
     employee: employeeId,
     status: 'approved',
     startDate: { $gte: yearStartUTC(year), $lt: yearEndUTC(year) },
-  });
+  };
+  const approved = await CongeRequest.find(query);
   const used = approved.reduce((sum, c) => sum + inclusiveDayCount(c.startDate, c.endDate), 0);
   return Math.max(0, ANNUAL_CONGE_DAYS - used);
 };
@@ -661,12 +672,28 @@ router.patch('/conge/:id/status', protect, authorize('rh', 'admin'), async (req,
     if (!['approved', 'rejected', 'pending'].includes(status)) {
       return res.status(400).json({ message: 'Statut invalide' });
     }
-    const conge = await CongeRequest.findByIdAndUpdate(
-      req.params.id,
-      { status, rhComment: rhComment || '' },
-      { new: true }
-    ).populate('employee', 'name email cin');
+    const conge = await CongeRequest.findById(req.params.id);
     if (!conge) return res.status(404).json({ message: 'Demande introuvable' });
+
+    // Approval was a blind status write, so 30 days could be approved against
+    // an 18-day entitlement with nothing to stop it. The balance is checked
+    // here rather than at request time because approvals are what consume it,
+    // and other requests may have been approved in between.
+    if (status === 'approved' && conge.status !== 'approved') {
+      const days = inclusiveDayCount(conge.startDate, conge.endDate);
+      const year = new Date(conge.startDate).getUTCFullYear();
+      const remaining = await calcSolde(conge.employee, year);
+      if (days > remaining) {
+        return res.status(400).json({
+          message: `Solde insuffisant: ${days} jour(s) demandé(s), ${remaining} jour(s) restant(s) sur ${ANNUAL_CONGE_DAYS} par an.`,
+        });
+      }
+    }
+
+    conge.status = status;
+    conge.rhComment = rhComment || '';
+    await conge.save();
+    await conge.populate('employee', 'name email cin');
     res.json({ success: true, data: conge });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

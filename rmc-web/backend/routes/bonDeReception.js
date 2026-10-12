@@ -169,8 +169,19 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
 
     // Only allow deletion of signed bons
     if (bon.status !== 'signed') {
-      return res.status(400).json({ 
-        message: 'Only signed Bons de Réception can be deleted' 
+      return res.status(400).json({
+        message: 'Only signed Bons de Réception can be deleted'
+      });
+    }
+
+    // A bon already billed is part of an invoice's line items. Deleting it would
+    // leave the facture pointing at a document that no longer exists, so the
+    // invoice total could no longer be reconciled against the work it bills.
+    // `facture` is the lock facturation.js sets on invoice create and clears on
+    // invoice delete, so reading it needs no extra query.
+    if (bon.facture != null) {
+      return res.status(409).json({
+        message: 'Impossible de supprimer ce bon: il est rattaché à une facture.'
       });
     }
 
