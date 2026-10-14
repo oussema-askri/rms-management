@@ -33,6 +33,12 @@
           "backgroundColor": "#ffffff"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "405e120e-5414-4fd9-aa50-d5ba77a530f7"
+      }
+    },
+    "owner": "oussema22"
   }
 }
