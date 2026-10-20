@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   Alert, Modal, Platform, KeyboardAvoidingView,
-  ActivityIndicator, TextInput, Animated,
+  ActivityIndicator, TextInput, Animated, RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -47,6 +48,8 @@ export default function MyCongeScreen() {
     return Math.max(1, diff);
   };
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const fetchConges = useCallback(async () => {
     try {
       const res = await api.get('/rh/my-conge');
@@ -66,10 +69,14 @@ export default function MyCongeScreen() {
       console.error(e);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
-  useEffect(() => { fetchConges(); }, [fetchConges]);
+  // Refetch whenever the screen comes back into view, as the other lists do.
+  // This one loaded once on mount, so a congé approved or rejected meanwhile
+  // only showed up after restarting the app.
+  useFocusEffect(useCallback(() => { fetchConges(); }, [fetchConges]));
 
   const openPicker = (target) => setPickerTarget(target);
 
@@ -201,7 +208,11 @@ export default function MyCongeScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchConges(); }} />}
+      >
         
         {/* Visualizer Solde */}
         <View style={styles.soldeCard}>

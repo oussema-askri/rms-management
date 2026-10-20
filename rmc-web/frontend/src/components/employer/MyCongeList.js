@@ -3,9 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { rhAPI } from '../../services/api';
 import '../rh/CongeList.css';
 import { openFile } from '../../services/files';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 
 const statusLabel = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
+
+// Calendar days, both ends included, weekends counted: the same rule the
+// server uses (inclusiveDayCount in routes/rh.js) when it checks the balance.
+const dayCount = (start, end) => {
+  if (!start || !end) return 0;
+  const days = Math.round((Date.parse(end) - Date.parse(start)) / 86400000) + 1;
+  return days > 0 ? days : 0;
+};
 const statusClass = { pending: 'status-pending', approved: 'status-approved', rejected: 'status-rejected' };
 
 function MyCongeList() {
@@ -33,10 +42,17 @@ function MyCongeList() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchConges);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    // The end date's `min` only applies while picking it; changing the start
+    // date afterwards could still leave the end before it.
+    if (formData.endDate < formData.startDate) {
+      setError('La date de fin doit être après la date de début.');
+      return;
+    }
     setSubmitting(true);
     try {
       const fd = new FormData();
@@ -54,6 +70,13 @@ function MyCongeList() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setError('');
+    setFormData({ startDate: '', endDate: '', reason: '' });
+    setPieceJointe(null);
   };
 
   const handleDelete = async (id) => {
@@ -155,11 +178,11 @@ function MyCongeList() {
 
       {/* New Conge Modal */}
       {showForm && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowForm(false)}>
+        <div className="modal-overlay conge-modal" onClick={e => e.target === e.currentTarget && closeForm()}>
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Nouvelle Demande de Congé</h2>
-              <button className="close-btn" onClick={() => setShowForm(false)}>&times;</button>
+              <h2>Nouvelle demande de congé</h2>
+              <button type="button" className="close-btn" onClick={closeForm} aria-label="Fermer">&times;</button>
             </div>
 
             <form className="conge-form" onSubmit={handleSubmit}>
@@ -187,6 +210,21 @@ function MyCongeList() {
                 </div>
               </div>
 
+              {formData.startDate && formData.endDate && (() => {
+                const days = dayCount(formData.startDate, formData.endDate);
+                // The balance shown is this year's; a request starting in
+                // another year is checked against that year's balance.
+                const thisYear = formData.startDate.slice(0, 4) === String(new Date().getFullYear());
+                const over = thisYear && days > solde;
+                return (
+                  <div className={`conge-summary${over ? ' over' : ''}`}>
+                    <span>Durée : <strong>{days} jour{days > 1 ? 's' : ''}</strong> (week-ends compris)</span>
+                    <span>Solde restant : <strong>{solde} jour{solde > 1 ? 's' : ''}</strong></span>
+                    {over && <p>Cette demande dépasse votre solde : elle sera refusée à l'approbation.</p>}
+                  </div>
+                );
+              })()}
+
               <div className="form-group">
                 <label>Raison *</label>
                 <textarea
@@ -199,15 +237,19 @@ function MyCongeList() {
 
               <div className="form-group">
                 <label>Pièce jointe (optionnel)</label>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={e => setPieceJointe(e.target.files[0])}
-                />
+                <label className="conge-file">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={e => setPieceJointe(e.target.files[0] || null)}
+                  />
+                  <span className="conge-file-button">Choisir un fichier</span>
+                  <span className="conge-file-name">{pieceJointe ? pieceJointe.name : 'Aucun fichier (PDF, JPG, PNG)'}</span>
+                </label>
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowForm(false)}>
+                <button type="button" className="btn-cancel" onClick={closeForm}>
                   Annuler
                 </button>
                 <button type="submit" className="btn-submit" disabled={submitting}>

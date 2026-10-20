@@ -5,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import AccessRequestForm from './AccessRequestForm';
 import './AccessRequestList.css';
 import { openFile } from '../../services/files';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function AccessRequestList() {
   const [requests, setRequests] = useState([]);
@@ -27,6 +28,7 @@ function AccessRequestList() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchRequests);
 
   const handleApprove = async (id) => {
     if (!window.confirm('Approuver cette demande?')) return;

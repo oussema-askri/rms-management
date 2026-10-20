@@ -5,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import ExpenseForm from './ExpenseForm';
 import './ExpenseList.css';
 import { openFile } from '../../services/files';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function ExpenseList() {
   const [expenses, setExpenses] = useState([]);
@@ -14,7 +15,11 @@ function ExpenseList() {
   const [dateFilter, setDateFilter] = useState('all');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
-  const { isAdmin, isRH } = useContext(AuthContext);
+  const { isAdmin, isRH, user } = useContext(AuthContext);
+  // Login returns the user as { id }, /auth/me as { _id }; accept either.
+  const myId = user?._id || user?.id;
+  // The server refuses to let anyone decide their own expense.
+  const isMine = (expense) => String(expense.createdBy?._id || expense.createdBy) === String(myId);
 
   useEffect(() => {
     fetchExpenses();
@@ -30,6 +35,7 @@ function ExpenseList() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchExpenses);
 
   const handleApprove = async (id) => {
     if (!window.confirm('Approuver cette dépense?')) return;
@@ -278,7 +284,7 @@ function ExpenseList() {
                         </button>
                       )}
 
-                      {(isAdmin || isRH) && expense.status === 'pending' && (
+                      {(isAdmin || isRH) && expense.status === 'pending' && !isMine(expense) && (
                         <>
                           <button
                             onClick={() => handleApprove(expense._id)}

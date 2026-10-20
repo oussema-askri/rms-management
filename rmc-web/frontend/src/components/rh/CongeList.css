@@ -489,3 +489,269 @@
     min-height: 36px;
   }
 }
+
+/* ── New congé request box ────────────────────────────────────────────────
+   Scoped under .conge-modal. This box used only generic classes
+   (modal-content, form-row, btn-submit...) and had no styles of its own, so it
+   borrowed whatever other components defined for those names. That changed
+   with the pages visited before opening it: no padding around the form, a
+   tiny textarea, a raw file input. Two-class selectors here outrank those
+   single-class rules wherever they load. */
+
+.conge-modal.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 20, 40, 0.55);
+}
+
+.conge-modal .modal-content {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface-container-lowest);
+  border-radius: 12px;
+  box-shadow: var(--shadow-xl);
+}
+
+.conge-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  background: var(--surface-container-low);
+  border-bottom: 1px solid var(--outline-variant);
+  color: var(--primary);
+}
+
+.conge-modal .modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.conge-modal .close-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.conge-modal .close-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.conge-modal .conge-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.conge-modal .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.conge-modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.conge-modal .form-group > label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+
+.conge-modal input[type='date'],
+.conge-modal textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--outline-variant);
+  border-radius: 8px;
+  background: var(--surface-container-lowest);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 14px;
+}
+
+.conge-modal textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.conge-modal input[type='date']:focus,
+.conge-modal textarea:focus {
+  outline: none;
+  border-color: var(--primary-container);
+  box-shadow: 0 0 0 3px var(--primary-fixed);
+}
+
+/* Duration and balance, shown once both dates are picked */
+.conge-modal .conge-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--primary-fixed);
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.conge-modal .conge-summary p {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.conge-modal .conge-summary.over {
+  background: var(--error-container);
+  color: var(--error);
+}
+
+/* File picker: the native input stays (keyboard and screen-reader friendly)
+   but is visually replaced by a button and the chosen file's name. */
+.conge-modal .conge-file {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: 1px dashed var(--outline-variant);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.conge-modal .conge-file input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.conge-modal .conge-file:focus-within {
+  border-color: var(--primary-container);
+  box-shadow: 0 0 0 3px var(--primary-fixed);
+}
+
+.conge-modal .conge-file-button {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.conge-modal .conge-file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--on-surface-variant);
+  font-size: 13px;
+}
+
+.conge-modal .error-message {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--error-container);
+  color: var(--error);
+  font-size: 13px;
+}
+
+.conge-modal .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--outline-variant);
+}
+
+.conge-modal .btn-cancel,
+.conge-modal .btn-submit {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.conge-modal .btn-cancel {
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+  color: var(--on-surface);
+}
+
+.conge-modal .btn-cancel:hover {
+  background: var(--surface-container);
+}
+
+.conge-modal .btn-submit {
+  border: none;
+  background: var(--primary);
+  color: #fff;
+}
+
+.conge-modal .btn-submit:hover:not(:disabled) {
+  background: var(--primary-container);
+}
+
+.conge-modal .btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Phones: one column, full-width buttons */
+@media (max-width: 520px) {
+  .conge-modal .form-row {
+    grid-template-columns: 1fr;
+  }
+  .conge-modal .conge-form {
+    gap: 12px;
+    padding: 16px;
+  }
+  .conge-modal .modal-header {
+    padding: 14px 16px;
+  }
+  .conge-modal textarea {
+    min-height: 72px;
+  }
+  .conge-modal .form-actions {
+    padding-top: 12px;
+  }
+  .conge-modal .form-actions {
+    flex-direction: column-reverse;
+  }
+  .conge-modal .btn-cancel,
+  .conge-modal .btn-submit {
+    width: 100%;
+  }
+}

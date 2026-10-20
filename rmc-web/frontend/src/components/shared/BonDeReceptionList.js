@@ -5,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import BonDeReceptionView from './BonDeReceptionView';
 import './BonDeReceptionList.css';
 import { openFile } from '../../services/files';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function BonDeReceptionList() {
   const [bons, setBons] = useState([]);
@@ -28,6 +29,7 @@ function BonDeReceptionList() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchBons);
 
   const handleView = (bon) => {
     setSelectedBon(bon);

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   Alert, TextInput, ActivityIndicator, RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import api from '../../api/axios';
 import { COLORS } from '../../constants/config';
 
@@ -36,7 +37,10 @@ export default function CongeManagementScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchConges(); }, [fetchConges]);
+  // Refetch whenever the screen comes back into view, as the other lists do.
+  // This one loaded once on mount, so a congé approved or rejected meanwhile
+  // only showed up after restarting the app.
+  useFocusEffect(useCallback(() => { fetchConges(); }, [fetchConges]));
 
   const handleStatus = async (id, status) => {
     const label = status === 'approved' ? 'approuver' : 'rejeter';

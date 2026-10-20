@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { rhAPI } from '../../services/api';
 import '../rh/AccessRequestList.css';
 import { openFile } from '../../services/files';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 
 function MyAccessRequestList() {
@@ -24,6 +25,7 @@ function MyAccessRequestList() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchRequests);
 
   const downloadDocument = (docPath) => {
     if (!docPath) {

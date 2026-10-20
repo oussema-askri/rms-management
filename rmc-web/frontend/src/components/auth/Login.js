@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { homePathFor } from '../../utils/permissions';
 import './Login.css';
 
 function Login() {
@@ -20,12 +21,7 @@ function Login() {
     const result = await login(email, password);
 
     if (result.success) {
-      const role = result.user.role;
-      if (role === 'admin') navigate('/admin');
-      else if (role === 'rh') navigate('/rh');
-      else if (role === 'responsable') navigate('/responsable');
-      else if (role === 'comptable') navigate('/comptable');
-      else navigate('/employer');
+      navigate(homePathFor(result.user.role), { replace: true });
     } else {
       setError(result.message);
     }

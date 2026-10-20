@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { bonDeReceptionAPI, facturationAPI } from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
 import './Facturation.css';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function Facturation() {
   const { user } = useContext(AuthContext);
@@ -28,8 +29,8 @@ function Facturation() {
     fetchFactures();
   }, []);
 
-  const fetchFactures = async () => {
-    setLoading(true);
+  const fetchFactures = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     try {
       const res = await facturationAPI.getAll();
       setFactures(res.data.data || []);
@@ -39,6 +40,7 @@ function Facturation() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchFactures);
 
   const startNewFacture = async () => {
     setLoading(true);

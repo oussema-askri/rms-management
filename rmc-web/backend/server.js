@@ -47,6 +47,16 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.use('/api', apiLimiter);
 
+// API responses carry personal data (employees, payroll, CIN numbers) and were
+// sent with no cache headers, so browsers kept them in their HTTP cache, which
+// on a shared office computer outlives signing out. Stored files get the same.
+const noStore = (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+};
+app.use('/api', noStore);
+app.use('/uploads', noStore);
+
 // Stored files. This used to be express.static, which served every CIN scan,
 // employee photo, expense receipt and site permit to anyone with the URL.
 // routes/files.js requires a session and checks ownership per category.
@@ -66,7 +76,7 @@ app.use('/api/pointage', require('./routes/pointage'));
 // Basic route
 app.get('/', (req, res) => {
   res.json({
-    message: 'RMS Management API is running!',
+    message: 'API RMS opérationnelle',
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
@@ -123,7 +133,11 @@ app.use((err, req, res, next) => {
   }
 
   console.error('Unhandled error:', err);
-  res.status(err.status || 500).json({ message: err.message || 'Server error' });
+  // Only errors deliberately marked as the client's fault (a status below 500,
+  // such as the upload filters' 400) carry their message out. Anything else
+  // used to send raw database or library text to the browser.
+  const status = err.status && err.status < 500 ? err.status : 500;
+  res.status(status).json({ message: status < 500 && err.message ? err.message : 'Erreur serveur' });
 });
 
 const PORT = process.env.PORT || 5000;

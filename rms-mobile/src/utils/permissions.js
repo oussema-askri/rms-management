@@ -66,6 +66,23 @@ export const canAddPrime = (role) =>
   has(role, ROLES.RH, ROLES.ADMIN, ROLES.RESPONSABLE);
 export const canResetPassword = (role) => has(role, ROLES.ADMIN);
 export const canSeeSalaries = (role) => has(role, ROLES.RH, ROLES.ADMIN, ROLES.COMPTABLE);
+// Employee photos and CIN scans (routes/files.js `employees` rule; the owner can
+// also see their own, which the list never needs).
+export const canViewEmployeePhotos = (role) =>
+  has(role, ROLES.RH, ROLES.ADMIN, ROLES.RESPONSABLE);
+// Pay is written only by RH and admin (canSetPay in POST/PUT /rh/employees);
+// for anyone else the server drops the values, so the fields are hidden.
+export const canSetPay = (role) => has(role, ROLES.RH, ROLES.ADMIN);
+// A responsable is never sent an employee's CNSS, so editing it would only
+// submit a blank; the server ignores it for them (allowedFields in PUT).
+export const canEditCnss = (role) => has(role, ROLES.RH, ROLES.ADMIN);
+// Which roles each role may give an account (utils/roles.js ASSIGNABLE_ROLES).
+const ASSIGNABLE_ROLES = {
+  [ROLES.ADMIN]: [ROLES.EMPLOYER, ROLES.RH, ROLES.ADMIN, ROLES.RESPONSABLE, ROLES.COMPTABLE],
+  [ROLES.RH]: [ROLES.EMPLOYER, ROLES.RESPONSABLE, ROLES.COMPTABLE],
+  [ROLES.RESPONSABLE]: [ROLES.EMPLOYER],
+};
+export const assignableRoles = (role) => ASSIGNABLE_ROLES[role] || [];
 
 // ── Demandes d'accès ───────────────────────────────────────────────────────
 // routes/rh.js

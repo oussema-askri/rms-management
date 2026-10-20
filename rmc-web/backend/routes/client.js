@@ -5,9 +5,10 @@ const path = require('path');
 const Client = require('../models/Client');
 const { protect, authorize } = require('../middleware/auth');
 const { uploadPath, toStoredPath } = require('../config/uploadDirs');
-const { removeStoredFiles, blockedBy } = require('../utils/cleanup');
+const { removeStoredFiles, discardUploads, blockedBy } = require('../utils/cleanup');
 const { withConflictRetry, withDuplicateRetry } = require('../utils/retry');
 const Planning = require('../models/Planning');
+const mongoose = require('mongoose');
 const BonDeReception = require('../models/BonDeReception');
 
 // Configure multer for file uploads
@@ -59,7 +60,7 @@ router.get('/', protect, async (req, res) => {
     res.json({ success: true, count: clients.length, data: clients });
   } catch (error) {
     console.error('Error fetching clients:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -72,13 +73,13 @@ router.get('/:id', protect, async (req, res) => {
       .populate('createdBy', 'name email');
 
     if (!client) {
-      return res.status(404).json({ message: 'Client not found' });
+      return res.status(404).json({ message: 'Client introuvable' });
     }
 
     res.json({ success: true, data: client });
   } catch (error) {
     console.error('Error fetching client:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -88,7 +89,7 @@ router.get('/:id', protect, async (req, res) => {
 // Creating clients and their units was open to every signed-in role,
 // including plain employees, while both interfaces already hid the action from
 // them. The guard now matches what the apps present.
-router.post('/', protect, authorize('rh', 'admin', 'responsable', 'comptable'), upload.array('pieceJointe', 5), async (req, res) => {
+router.post('/', protect, authorize('rh', 'admin', 'responsable', 'comptable'), upload.array('pieceJointe', 5), async (req, res, next) => {
   try {
     const {
       name,
@@ -134,15 +135,18 @@ router.post('/', protect, authorize('rh', 'admin', 'responsable', 'comptable'), 
 
     res.status(201).json({ success: true, data: populatedClient });
   } catch (error) {
-    console.error('Error creating client:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    // A missing name used to come back as a 500 carrying the raw Mongoose
+    // message, with the uploaded attachments left on disk. The central handler
+    // answers a validation error with a 400 and logs the rest.
+    discardUploads(req);
+    next(error);
   }
 });
 
 // ============================================
 // UPDATE CLIENT - ONLY RH AND ADMIN
 // ============================================
-router.put('/:id', protect, authorize('rh', 'admin'), upload.array('pieceJointe', 5), async (req, res) => {
+router.put('/:id', protect, authorize('rh', 'admin'), upload.array('pieceJointe', 5), async (req, res, next) => {
   try {
     const {
       name,
@@ -158,7 +162,8 @@ router.put('/:id', protect, authorize('rh', 'admin'), upload.array('pieceJointe'
     let client = await Client.findById(req.params.id);
 
     if (!client) {
-      return res.status(404).json({ message: 'Client not found' });
+      discardUploads(req);
+      return res.status(404).json({ message: 'Client introuvable' });
     }
 
     // Update fields
@@ -187,8 +192,8 @@ router.put('/:id', protect, authorize('rh', 'admin'), upload.array('pieceJointe'
 
     res.json({ success: true, data: populatedClient });
   } catch (error) {
-    console.error('Error updating client:', error);
-    res.status(500).json({ message: 'Server error' });
+    discardUploads(req);
+    next(error);
   }
 });
 
@@ -200,7 +205,7 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
     const client = await Client.findById(req.params.id);
 
     if (!client) {
-      return res.status(404).json({ message: 'Client not found' });
+      return res.status(404).json({ message: 'Client introuvable' });
     }
 
     // Deleting a client used to leave its tasks, receipt slips and invoices
@@ -222,10 +227,10 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
     removeStoredFiles((client.pieceJointe || []).map(f => f.filePath));
     await client.deleteOne();
 
-    res.json({ success: true, message: 'Client deleted' });
+    res.json({ success: true, message: 'Client supprimé' });
   } catch (error) {
     console.error('Error deleting client:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -246,7 +251,7 @@ router.post('/:id/unites', protect, authorize('rh', 'admin', 'responsable', 'com
     const client = await Client.findById(req.params.id);
 
     if (!client) {
-      return res.status(404).json({ message: 'Client not found' });
+      return res.status(404).json({ message: 'Client introuvable' });
     }
 
     // Read-compute-write over two round trips let two simultaneous requests pick
@@ -294,7 +299,7 @@ router.post('/:id/unites', protect, authorize('rh', 'admin', 'responsable', 'com
   } catch (error) {
     console.error('Error adding unite:', error);
     res.status(500).json({
-      message: 'Server error',
+      message: 'Erreur serveur',
       error: error.message
     });
   }
@@ -308,12 +313,12 @@ router.delete('/:id/unites/:uniteId', protect, authorize('rh', 'admin'), async (
     const client = await Client.findById(req.params.id);
 
     if (!client) {
-      return res.status(404).json({ message: 'Client not found' });
+      return res.status(404).json({ message: 'Client introuvable' });
     }
 
     const unite = client.unites.id(req.params.uniteId);
     if (!unite) {
-      return res.status(404).json({ message: 'Unite not found' });
+      return res.status(404).json({ message: 'Unité introuvable' });
     }
 
     // Tasks and receipt slips reference a unit by its number, not by its id, so
@@ -342,7 +347,7 @@ router.delete('/:id/unites/:uniteId', protect, authorize('rh', 'admin'), async (
     res.json({ success: true, data: populatedClient });
   } catch (error) {
     console.error('Error deleting unite:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -360,11 +365,11 @@ router.post('/:clientId/unites/:uniteId/sous-titres', protect, authorize('rh', '
     const client = await Client.findById(req.params.clientId);
 
     if (!client) {
-      return res.status(404).json({ message: 'Client not found' });
+      return res.status(404).json({ message: 'Client introuvable' });
     }
 
     if (!client.unites.id(req.params.uniteId)) {
-      return res.status(404).json({ message: 'Unite not found' });
+      return res.status(404).json({ message: 'Unité introuvable' });
     }
 
     // Same conditional push as the unite route: apply only while the generated
@@ -379,11 +384,19 @@ router.post('/:clientId/unites/:uniteId/sous-titres', protect, authorize('rh', '
       );
       const refNumber = `${unite.uniteNumber}-${String(nextRef).padStart(2, '0')}`;
 
+      // Both conditions sit inside one $elemMatch so the positional `$` in the
+      // update is set by that single match. With the $ne outside it, MongoDB
+      // documents `$` as unreliable for negated array queries: the push could
+      // fail or land in another unit.
       return Client.findOneAndUpdate(
         {
           _id: req.params.clientId,
-          'unites._id': req.params.uniteId,
-          'unites.sousTitres.refNumber': { $ne: refNumber }
+          unites: {
+            $elemMatch: {
+              _id: new mongoose.Types.ObjectId(req.params.uniteId),
+              'sousTitres.refNumber': { $ne: refNumber }
+            }
+          }
         },
         { $push: { 'unites.$.sousTitres': { name, refNumber } } },
         { new: true, runValidators: true }
@@ -402,7 +415,7 @@ router.post('/:clientId/unites/:uniteId/sous-titres', protect, authorize('rh', '
     res.json({ success: true, data: populatedClient });
   } catch (error) {
     console.error('Error adding sous-titre:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -414,12 +427,29 @@ router.delete('/:clientId/unites/:uniteId/sous-titres/:sousTitreId', protect, au
     const client = await Client.findById(req.params.clientId);
 
     if (!client) {
-      return res.status(404).json({ message: 'Client not found' });
+      return res.status(404).json({ message: 'Client introuvable' });
     }
 
     const unite = client.unites.id(req.params.uniteId);
     if (!unite) {
-      return res.status(404).json({ message: 'Unite not found' });
+      return res.status(404).json({ message: 'Unité introuvable' });
+    }
+
+    const sousTitre = unite.sousTitres.id(req.params.sousTitreId);
+    if (!sousTitre) {
+      return res.status(404).json({ message: 'Sous-titre introuvable' });
+    }
+
+    // Same guard as deleting a unit. Tasks keep the sous-titre's refNumber, and
+    // new references are numbered from the highest one left, so deleting the
+    // last sous-titre handed its number to the next one created: old tasks then
+    // pointed at a different sous-titre on slips and invoices.
+    const tasks = await Planning.countDocuments({ sousTitreRef: sousTitre.refNumber });
+    const blocking = blockedBy({ 'tâche(s)': tasks });
+    if (blocking) {
+      return res.status(409).json({
+        message: `Impossible de supprimer ce sous-titre: ${blocking} y sont rattaché(s).`
+      });
     }
 
     unite.sousTitres = unite.sousTitres.filter(
@@ -434,7 +464,7 @@ router.delete('/:clientId/unites/:uniteId/sous-titres/:sousTitreId', protect, au
     res.json({ success: true, data: populatedClient });
   } catch (error) {
     console.error('Error deleting sous-titre:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

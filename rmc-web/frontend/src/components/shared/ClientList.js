@@ -5,6 +5,7 @@ import ClientForm from './ClientForm';
 import UniteModal from './UniteModal';
 import './ClientList.css';
 import { openFile } from '../../services/files';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function ClientList() {
   const [clients, setClients] = useState([]);
@@ -22,21 +23,24 @@ function ClientList() {
     fetchClients();
   }, []);
 
-  const fetchClients = async () => {
+  const fetchClients = async ({ silent = false } = {}) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const response = await clientAPI.getAll();
       const clientsData = unwrapList(response);
       setClients(clientsData);
       return clientsData;
     } catch (error) {
       console.error('Error fetching clients:', error);
-      setClients([]);
+      // A failed background refresh keeps the list already on screen; only a
+      // failed first load falls back to empty.
+      if (!silent) setClients([]);
       return [];
     } finally {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchClients);
 
   // The unite modal renders from the selectedClient snapshot, so refetching the
   // list alone left it showing stale unites until it was closed and reopened.

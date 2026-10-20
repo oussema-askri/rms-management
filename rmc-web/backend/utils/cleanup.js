@@ -36,6 +36,22 @@ const removeStoredFile = (storedPath) => {
 
 const removeStoredFiles = (paths = []) => paths.forEach(removeStoredFile);
 
+// Delete whatever multer saved for a request that then failed. multer writes
+// the files before the handler runs, so a validation error or a 404 used to
+// leave them on disk with nothing pointing at them. Handles .single (req.file),
+// .array (req.files as a list) and .fields (req.files keyed by field name).
+const discardUploads = (req) => {
+  const files = [];
+  if (req.file) files.push(req.file);
+  if (Array.isArray(req.files)) files.push(...req.files);
+  else if (req.files) Object.values(req.files).forEach((list) => files.push(...list));
+  files.forEach((f) => {
+    const target = path.resolve(f.path);
+    if (!target.startsWith(uploadsRoot + path.sep)) return; // never outside uploads
+    fs.unlink(target, () => {}); // already gone is fine
+  });
+};
+
 // Build the 409 body listing what still points at a record, so the user is told
 // why the deletion was refused rather than being left with a generic error.
 const blockedBy = (counts) => {
@@ -45,4 +61,4 @@ const blockedBy = (counts) => {
   return parts.length ? parts.join(', ') : null;
 };
 
-module.exports = { removeStoredFile, removeStoredFiles, blockedBy };
+module.exports = { removeStoredFile, removeStoredFiles, discardUploads, blockedBy };

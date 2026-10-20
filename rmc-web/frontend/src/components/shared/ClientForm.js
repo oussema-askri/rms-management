@@ -83,7 +83,7 @@ function ClientForm({ onClose, onSuccess, editData }) {
       onSuccess();
       onClose();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to save client');
+      setError(error.response?.data?.message || "Impossible d'enregistrer le client");
     } finally {
       setLoading(false);
     }

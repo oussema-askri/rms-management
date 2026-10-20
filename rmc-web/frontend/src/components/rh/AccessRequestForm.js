@@ -136,7 +136,7 @@ function AccessRequestForm({ onClose, onSuccess }) {
       onSuccess();
       onClose();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to create access request');
+      setError(error.response?.data?.message || "Impossible de créer la demande d'accès");
     } finally {
       setLoading(false);
     }

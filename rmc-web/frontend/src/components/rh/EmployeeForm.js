@@ -1,9 +1,34 @@
 // frontend/src/components/rh/EmployeeForm.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { rhAPI } from '../../services/api';
+import { AuthContext } from '../../context/AuthContext';
+import { assignableRoles, canSetPay, canEditCnss } from '../../utils/permissions';
 import './EmployeeForm.css';
 
+const ROLE_LABELS = {
+  employer: 'Employé',
+  responsable: 'Responsable',
+  rh: 'RH (Ressources Humaines)',
+  comptable: 'Comptable',
+  admin: 'Admin',
+};
+
 function EmployeeForm({ onClose, onSuccess, editData }) {
+  const { user } = useContext(AuthContext);
+  const myRole = user?.role;
+  // Only offer roles the server will accept from this user. An account being
+  // edited keeps its current role in the list even when this user could not
+  // assign it, and the choice is then locked rather than failing with a 403.
+  const allowedRoles = assignableRoles(myRole);
+  const currentRole = editData?.role;
+  const roleOptions = currentRole && !allowedRoles.includes(currentRole)
+    ? [currentRole, ...allowedRoles]
+    : allowedRoles;
+  const roleLocked = !!currentRole && !allowedRoles.includes(currentRole);
+  const showPay = canSetPay(myRole);
+  // On creation the CNSS is new data the responsable can enter; on edit they
+  // were never sent the stored value, so the field would only blank it.
+  const showCnss = !editData || canEditCnss(myRole);
   const [formData, setFormData] = useState({
     name: editData?.name || '',
     email: editData?.email || '',
@@ -75,7 +100,7 @@ function EmployeeForm({ onClose, onSuccess, editData }) {
       onSuccess();
       onClose();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to save employee');
+      setError(error.response?.data?.message || "Impossible d'enregistrer l'employé");
     } finally {
       setLoading(false);
     }
@@ -175,16 +200,18 @@ function EmployeeForm({ onClose, onSuccess, editData }) {
             </div>
 
             <div className="form-row">
-              <div className="form-group">
-                <label>CNSS</label>
-                <input
-                  type="text"
-                  name="cnss"
-                  value={formData.cnss}
-                  onChange={handleChange}
-                  placeholder="Numéro CNSS"
-                />
-              </div>
+              {showCnss && (
+                <div className="form-group">
+                  <label>CNSS</label>
+                  <input
+                    type="text"
+                    name="cnss"
+                    value={formData.cnss}
+                    onChange={handleChange}
+                    placeholder="Numéro CNSS"
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label>État Social</label>
@@ -213,13 +240,12 @@ function EmployeeForm({ onClose, onSuccess, editData }) {
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
+                  disabled={roleLocked}
                   required
                 >
-                  <option value="employer">Employé</option>
-                  <option value="responsable">Responsable</option>
-                  <option value="rh">RH (Ressources Humaines)</option>
-                  <option value="comptable">Comptable</option>
-                  <option value="admin">Admin</option>
+                  {roleOptions.map((r) => (
+                    <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>
+                  ))}
                 </select>
               </div>
 
@@ -237,6 +263,7 @@ function EmployeeForm({ onClose, onSuccess, editData }) {
               </div>
             </div>
 
+            {showPay && (
             <div className="form-row">
               <div className="form-group">
                 <label>Salaire Mensuel (TND)</label>
@@ -266,6 +293,7 @@ function EmployeeForm({ onClose, onSuccess, editData }) {
                 </div>
               )}
             </div>
+            )}
           </div>
 
           <div className="form-section">

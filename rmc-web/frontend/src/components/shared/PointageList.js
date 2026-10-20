@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { pointageAPI } from '../../services/api';
 import './PointageForm.css';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function PointageList() {
   const [pointages, setPointages] = useState([]);
@@ -15,8 +16,8 @@ function PointageList() {
     fetchPointages();
   }, [month]);
 
-  const fetchPointages = async () => {
-    setLoading(true);
+  const fetchPointages = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     try {
       const res = await pointageAPI.getAll({ month });
       setPointages(res.data.data || []);
@@ -26,6 +27,7 @@ function PointageList() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchPointages);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer ce pointage ?')) return;

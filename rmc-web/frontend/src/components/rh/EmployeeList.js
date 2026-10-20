@@ -6,6 +6,8 @@ import EmployeeForm from './EmployeeForm';
 import './EmployeeList.css';
 import { openFile } from '../../services/files';
 import AuthImage from '../shared/AuthImage';
+import { canViewEmployeePhotos } from '../../utils/permissions';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
@@ -24,9 +26,13 @@ function EmployeeList() {
   // as a responsable returned 403, which rejected the whole Promise.all and left
   // every balance showing a hardcoded 18.
   const canSeeSoldes = isRH || isAdmin || isComptable;
+  // A comptable is refused employee photos, so requesting them only produced a
+  // 403 per row; the initials placeholder is shown instead.
+  const { user } = useContext(AuthContext);
+  const showPhotos = canViewEmployeePhotos(user?.role);
 
-  const fetchEmployees = async () => {
-    setLoading(true);
+  const fetchEmployees = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     try {
       const empRes = await rhAPI.getEmployees();
       setEmployees(empRes.data.data);
@@ -45,6 +51,7 @@ function EmployeeList() {
 
     setLoading(false);
   };
+  useAutoRefresh(fetchEmployees);
 
   const handleEdit = (employee) => {
     setEditData(employee);
@@ -238,7 +245,7 @@ function EmployeeList() {
                         {/* AuthImage renders nothing until the protected file
                             loads, so the initial placeholder stays visible and
                             is simply covered once the photo arrives. */}
-                        {emp.photo ? <AuthImage path={emp.photo} alt={emp.name} /> : null}
+                        {showPhotos && emp.photo ? <AuthImage path={emp.photo} alt={emp.name} /> : null}
                         <div className="avatar-placeholder">
                           {emp.name?.charAt(0).toUpperCase()}
                         </div>

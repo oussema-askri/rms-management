@@ -170,7 +170,10 @@ const ExpenseListScreen = ({ navigation }) => {
   const renderExpense = ({ item }) => {
     if (!item) return null;
 
-    const canApprove = canApproveExpense(user?.role) && item.status === 'pending';
+    // The server refuses to let anyone decide their own expense.
+    const myId = user?._id || user?.id;
+    const isMine = String(item.createdBy?._id || item.createdBy) === String(myId);
+    const canApprove = canApproveExpense(user?.role) && item.status === 'pending' && !isMine;
 
     return (
       <Card style={styles.expenseCard}>

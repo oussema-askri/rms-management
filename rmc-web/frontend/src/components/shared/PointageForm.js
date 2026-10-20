@@ -94,7 +94,9 @@ function PointageForm() {
         setMessage({ type: 'warning', text: 'Aucun pointage précédent trouvé' });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erreur lors de la duplication' });
+      // Say why: the generic text hid that these failures were 403s from a
+      // session belonging to another account.
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Erreur lors de la duplication' });
     } finally {
       setLoading(false);
     }

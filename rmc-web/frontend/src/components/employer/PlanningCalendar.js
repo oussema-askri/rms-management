@@ -4,6 +4,7 @@ import { planningAPI } from '../../services/api';
 import { rhAPI } from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
 import './PlanningCalendar.css';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function PlanningCalendar() {
   const [plannings, setPlannings] = useState([]);
@@ -47,6 +48,7 @@ function PlanningCalendar() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchData);
 
   // Calculate visible days based on view mode
   const visibleDays = useMemo(() => {

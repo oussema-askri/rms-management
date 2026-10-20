@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { fileUrl } from '../config';
+import { getToken } from './session';
 
 // Stored files used to be served by express.static, so a plain URL was enough
 // to view one. They now require a session, which a browser will not attach to a
@@ -11,7 +12,7 @@ const authedRequest = (storedPath) =>
   axios.get(fileUrl(storedPath), {
     responseType: 'blob',
     headers: (() => {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       return token ? { Authorization: `Bearer ${token}` } : {};
     })(),
   });

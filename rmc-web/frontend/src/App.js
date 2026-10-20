@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css';
 
 import { AuthProvider, AuthContext } from './context/AuthContext';
+import { homePathFor } from './utils/permissions';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -22,25 +23,36 @@ function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useContext(AuthContext);
 
   if (loading) {
-    return <div style={{ padding: '50px', textAlign: 'center' }}>Loading...</div>;
+    return <div style={{ padding: '50px', textAlign: 'center' }}>Chargement...</div>;
   }
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
+  // Another role's page: go to this user's own dashboard. This used to send
+  // them to the landing page, which looked exactly like being signed out.
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" />;
+    return <Navigate to={homePathFor(user.role)} replace />;
   }
 
   return children;
+}
+
+// Someone already signed in who opens /login (a bookmark, the back button)
+// goes straight to their dashboard instead of a login form.
+function LoginRoute() {
+  const { user, loading } = useContext(AuthContext);
+  if (loading) return null;
+  if (user) return <Navigate to={homePathFor(user.role)} replace />;
+  return <Login />;
 }
 
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<LoginRoute />} />
 
       <Route
         path="/employer"

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { authAPI, setUnauthorizedHandler } from '../services/api';
+import { getToken, setToken, clearToken } from '../services/session';
 
 export const AuthContext = createContext();
 
@@ -8,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (token) {
       getCurrentUser();
     } else {
@@ -28,8 +29,11 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.getCurrentUser();
       setUser(response.data.user);
     } catch (error) {
+      // Only a 401 means the token is dead; the api interceptor has already
+      // cleared it. A network drop or a server error must not sign the user
+      // out, or every blip during a reload looks like a lost session.
       console.error('Error getting current user:', error);
-      logout();
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -40,20 +44,20 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(email, password);
       const { token, user } = response.data;
       
-      localStorage.setItem('token', token);
+      setToken(token);
       setUser(user);
       
       return { success: true, user };
     } catch (error) {
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+        message: error.response?.data?.message || 'Connexion impossible. Vérifiez votre connexion internet.'
       };
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    clearToken();
     setUser(null);
   };
 

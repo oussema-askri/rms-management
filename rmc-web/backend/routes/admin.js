@@ -15,25 +15,36 @@ const { generateTemporaryPassword } = require('../utils/roles');
 // Get dashboard statistics
 router.get('/stats', protect, authorize('admin'), async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments();
-    const totalPlanning = await Planning.countDocuments();
-    const totalExpenses = await Expense.countDocuments();
-    const pendingExpenses = await Expense.countDocuments({ status: 'pending' });
-    const approvedExpenses = await Expense.countDocuments({ status: 'approved' });
-    const totalAccessRequests = await AccessRequest.countDocuments();
-
-    // Total expense amount
-    const expenseStats = await Expense.aggregate([
-      { $match: { status: 'approved' } },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
+    // Independent queries, run together rather than one after another, as
+    // /monthly-report already does: the dashboard waited on eight round trips.
+    const [
+      totalUsers,
+      totalPlanning,
+      totalExpenses,
+      pendingExpenses,
+      approvedExpenses,
+      totalAccessRequests,
+      expenseStats,
+      usersByRole,
+    ] = await Promise.all([
+      User.countDocuments(),
+      Planning.countDocuments(),
+      Expense.countDocuments(),
+      Expense.countDocuments({ status: 'pending' }),
+      Expense.countDocuments({ status: 'approved' }),
+      AccessRequest.countDocuments(),
+      // Total expense amount
+      Expense.aggregate([
+        { $match: { status: 'approved' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      // Users by role
+      User.aggregate([
+        { $group: { _id: '$role', count: { $sum: 1 } } }
+      ]),
     ]);
 
     const totalExpenseAmount = expenseStats.length > 0 ? expenseStats[0].total : 0;
-
-    // Users by role
-    const usersByRole = await User.aggregate([
-      { $group: { _id: '$role', count: { $sum: 1 } } }
-    ]);
 
     res.json({
       success: true,
@@ -50,27 +61,27 @@ router.get('/stats', protect, authorize('admin'), async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
 // Get recent activities
 router.get('/recent-activity', protect, authorize('admin'), async (req, res) => {
   try {
-    const recentExpenses = await Expense.find()
-      .limit(5)
-      .sort({ createdAt: -1 })
-      .populate('createdBy', 'name email');
-
-    const recentPlanning = await Planning.find()
-      .limit(5)
-      .sort({ createdAt: -1 })
-      .populate('createdBy', 'name email');
-
-    const recentUsers = await User.find()
-      .limit(5)
-      .sort({ createdAt: -1 })
-      .select('-password');
+    const [recentExpenses, recentPlanning, recentUsers] = await Promise.all([
+      Expense.find()
+        .limit(5)
+        .sort({ createdAt: -1 })
+        .populate('createdBy', 'name email'),
+      Planning.find()
+        .limit(5)
+        .sort({ createdAt: -1 })
+        .populate('createdBy', 'name email'),
+      User.find()
+        .limit(5)
+        .sort({ createdAt: -1 })
+        .select('-password'),
+    ]);
 
     res.json({
       success: true,
@@ -81,7 +92,7 @@ router.get('/recent-activity', protect, authorize('admin'), async (req, res) => 
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -113,7 +124,7 @@ router.post('/users/:id/reset-password', protect, authorize('admin'), async (req
     });
   } catch (error) {
     console.error('Error resetting password:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -344,7 +355,7 @@ router.get('/monthly-report', protect, authorize('admin'), async (req, res) => {
     });
   } catch (error) {
     console.error('Monthly report error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

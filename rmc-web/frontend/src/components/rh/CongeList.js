@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { rhAPI } from '../../services/api';
 import './CongeList.css';
 import { openFile } from '../../services/files';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 
 const statusLabel = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
@@ -33,6 +34,7 @@ function CongeList() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchConges);
 
   const handleStatus = async (id, status) => {
     try {

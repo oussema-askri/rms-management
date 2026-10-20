@@ -136,3 +136,29 @@ test('stored files are served with hardening headers', async () => {
   assert.equal(headers['x-content-type-options'], 'nosniff');
   assert.match(headers['cache-control'], /no-store/);
 });
+
+// The rule used to be picked from the raw first path segment while the file
+// served came from the resolved path, so "clients/../employees/x" passed the
+// open "clients" rule and returned an identity scan to any signed-in user.
+test('a category cannot be borrowed through .. to read another one', async () => {
+  const secretName = 'cross-category-fixture.txt';
+  const secretPath = path.join(uploadsRoot, 'employees', secretName);
+  fs.mkdirSync(path.dirname(secretPath), { recursive: true });
+  fs.writeFileSync(secretPath, 'cin scan');
+  try {
+    currentUser = { _id: 'u1', role: 'employer', cin: 'X1' };
+    ownsRecord = false; // not their file
+    for (const attempt of [
+      `/uploads/clients/../employees/${secretName}`,
+      `/uploads/clients/..%2Femployees%2F${secretName}`,
+      `/uploads/clients%2F..%2Femployees%2F${secretName}`,
+      `/uploads/clients/%2e%2e/employees/${secretName}`,
+      `/uploads/bon-de-reception/../employees/${secretName}`,
+    ]) {
+      const status = await request(attempt);
+      assert.notEqual(status, 200, `cross-category read succeeded for ${attempt}`);
+    }
+  } finally {
+    fs.unlinkSync(secretPath);
+  }
+});

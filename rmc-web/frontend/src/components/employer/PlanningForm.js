@@ -182,7 +182,7 @@ function PlanningForm({ onClose, onSuccess, editData }) {
       onSuccess();
       onClose();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to save planning');
+      setError(error.response?.data?.message || "Impossible d'enregistrer la tâche");
     } finally {
       setLoading(false);
     }

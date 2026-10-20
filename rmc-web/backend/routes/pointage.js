@@ -12,7 +12,7 @@ const { monthStartUTC, monthEndUTC } = require('../utils/dateRange');
 router.get('/planning-for-date', protect, authorize('responsable', 'admin', 'rh'), async (req, res) => {
   try {
     const { date } = req.query;
-    if (!date) return res.status(400).json({ message: 'Date is required' });
+    if (!date) return res.status(400).json({ message: 'Date requise' });
 
     const dayStart = new Date(date + 'T00:00:00.000Z');
     const dayEnd = new Date(date + 'T23:59:59.999Z');
@@ -27,7 +27,7 @@ router.get('/planning-for-date', protect, authorize('responsable', 'admin', 'rh'
     res.json({ success: true, data: plannings });
   } catch (error) {
     console.error('Error fetching planning for date:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -42,7 +42,7 @@ router.get('/employees', protect, authorize('responsable', 'admin', 'rh'), async
       .lean();
     res.json({ success: true, data: employees });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -53,7 +53,7 @@ router.post('/', protect, authorize('responsable', 'admin'), async (req, res) =>
   try {
     const { date, entries } = req.body;
     if (!date || !entries || !Array.isArray(entries)) {
-      return res.status(400).json({ message: 'Date and entries are required' });
+      return res.status(400).json({ message: 'Date et lignes de pointage requises' });
     }
 
     const dayDate = new Date(date + 'T00:00:00.000Z');
@@ -86,7 +86,7 @@ router.post('/', protect, authorize('responsable', 'admin'), async (req, res) =>
       return res.status(400).json({ message: 'Un pointage existe déjà pour cette date' });
     }
     console.error('Error saving pointage:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -96,7 +96,7 @@ router.post('/', protect, authorize('responsable', 'admin'), async (req, res) =>
 router.get('/my', protect, authorize('responsable', 'admin'), async (req, res) => {
   try {
     const { date } = req.query;
-    if (!date) return res.status(400).json({ message: 'Date is required' });
+    if (!date) return res.status(400).json({ message: 'Date requise' });
 
     const dayDate = new Date(date + 'T00:00:00.000Z');
 
@@ -107,7 +107,7 @@ router.get('/my', protect, authorize('responsable', 'admin'), async (req, res) =
 
     res.json({ success: true, data: pointage });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -117,7 +117,7 @@ router.get('/my', protect, authorize('responsable', 'admin'), async (req, res) =
 router.get('/duplicate', protect, authorize('responsable', 'admin'), async (req, res) => {
   try {
     const { date } = req.query;
-    if (!date) return res.status(400).json({ message: 'Date is required' });
+    if (!date) return res.status(400).json({ message: 'Date requise' });
 
     const currentDate = new Date(date + 'T00:00:00.000Z');
 
@@ -131,7 +131,7 @@ router.get('/duplicate', protect, authorize('responsable', 'admin'), async (req,
 
     res.json({ success: true, data: previous });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -152,7 +152,9 @@ router.get('/all', protect, authorize('admin', 'rh'), async (req, res) => {
       };
     }
 
-    if (responsableId) {
+    // A string only: ?responsableId[$ne]=x parses to an object, which Mongoose
+    // would treat as a query operator rather than an id.
+    if (typeof responsableId === 'string' && responsableId) {
       filter.createdBy = responsableId;
     }
 
@@ -163,7 +165,7 @@ router.get('/all', protect, authorize('admin', 'rh'), async (req, res) => {
 
     res.json({ success: true, data: pointages });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -189,7 +191,7 @@ router.get('/:id', protect, authorize('admin', 'rh', 'responsable'), async (req,
 
     res.json({ success: true, data: pointage });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -202,7 +204,7 @@ router.delete('/:id', protect, authorize('admin'), async (req, res) => {
     if (!pointage) return res.status(404).json({ message: 'Pointage introuvable' });
     res.json({ success: true, message: 'Pointage supprimé' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

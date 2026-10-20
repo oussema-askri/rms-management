@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_URL } from '../config';
+import { getToken, clearToken } from './session';
 
 // Create axios instance
 const api = axios.create({
@@ -12,7 +13,7 @@ const api = axios.create({
 // Add token to requests automatically
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -43,7 +44,7 @@ api.interceptors.response.use(
     const isLoginAttempt = error.config?.url?.includes('/auth/login');
 
     if (status === 401 && !isLoginAttempt) {
-      localStorage.removeItem('token');
+      clearToken();
       if (onUnauthorized) onUnauthorized();
     }
 

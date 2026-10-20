@@ -26,7 +26,7 @@ router.get('/', protect, async (req, res) => {
     res.json({ success: true, count: bons.length, data: bons });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -42,12 +42,12 @@ router.get('/:id', protect, async (req, res) => {
       });
 
     if (!bon) {
-      return res.status(404).json({ message: 'Bon de Réception not found' });
+      return res.status(404).json({ message: 'Bon de réception introuvable' });
     }
 
     res.json({ success: true, data: bon });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -60,7 +60,7 @@ router.get('/client/:clientId', protect, async (req, res) => {
 
     res.json({ success: true, count: bons.length, data: bons });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -75,15 +75,15 @@ router.post('/:id/sign', protect, authorize('rh', 'admin'), async (req, res) => 
       });
 
     if (!bon) {
-      return res.status(404).json({ message: 'Bon de Réception not found' });
+      return res.status(404).json({ message: 'Bon de réception introuvable' });
     }
 
     if (bon.status === 'signed') {
-      return res.status(400).json({ message: 'Bon already signed' });
+      return res.status(400).json({ message: 'Ce bon est déjà signé' });
     }
 
     if (bon.taches.length === 0) {
-      return res.status(400).json({ message: 'Cannot sign empty Bon de Réception' });
+      return res.status(400).json({ message: 'Impossible de signer un bon de réception vide' });
     }
 
     // Generate DOCX
@@ -92,7 +92,7 @@ router.post('/:id/sign', protect, authorize('rh', 'admin'), async (req, res) => 
       bon.docxPath = docPath;
     } catch (docError) {
       console.error('Error generating document:', docError);
-      return res.status(500).json({ message: 'Failed to generate document' });
+      return res.status(500).json({ message: 'Échec de la génération du document' });
     }
 
     // Lock the Bon
@@ -124,7 +124,7 @@ router.post('/:id/sign', protect, authorize('rh', 'admin'), async (req, res) => 
 
     res.json({
       success: true,
-      message: 'Bon de Réception signed successfully',
+      message: 'Bon de réception signé',
       data: populatedBon,
       newBon: {
         id: newBon._id,
@@ -133,7 +133,7 @@ router.post('/:id/sign', protect, authorize('rh', 'admin'), async (req, res) => 
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 });
 
@@ -143,7 +143,7 @@ router.get('/:id/download', protect, async (req, res) => {
     const bon = await BonDeReception.findById(req.params.id);
 
     if (!bon) {
-      return res.status(404).json({ message: 'Bon de Réception not found' });
+      return res.status(404).json({ message: 'Bon de réception introuvable' });
     }
 
     if (!bon.docxPath) {
@@ -155,7 +155,7 @@ router.get('/:id/download', protect, async (req, res) => {
       path: bon.docxPath
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -164,13 +164,13 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
     const bon = await BonDeReception.findById(req.params.id);
 
     if (!bon) {
-      return res.status(404).json({ message: 'Bon de Réception not found' });
+      return res.status(404).json({ message: 'Bon de réception introuvable' });
     }
 
     // Only allow deletion of signed bons
     if (bon.status !== 'signed') {
       return res.status(400).json({
-        message: 'Only signed Bons de Réception can be deleted'
+        message: 'Seuls les bons de réception signés peuvent être supprimés'
       });
     }
 
@@ -192,11 +192,11 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: 'Bon de Réception deleted successfully' 
+      message: 'Bon de réception supprimé' 
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

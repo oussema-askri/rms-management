@@ -96,17 +96,23 @@ router.get(/^\/(.*)/, protect, async (req, res) => {
       return res.status(400).json({ message: 'Chemin de fichier invalide' });
     }
 
+    // The category and the ownership lookup must come from the path that will
+    // actually be served. They used to come from the raw request, so
+    // "clients/../employees/x" (or with the slashes encoded) passed the open
+    // "clients" rule and then sent an employee's CIN scan to anyone signed in.
+    const normalised = path.relative(uploadsRoot, absolute).split(path.sep).join('/');
+
     // Authorisation is decided before existence, so a caller who may not read a
     // category always gets the same 403 whether or not the file is there. The
     // other order lets someone probe for filenames by telling 404 from 403.
-    const category = relative.replace(/^\/+/, '').split('/')[0];
+    const category = normalised.split('/')[0];
     const rule = rules[category];
     if (!rule) {
       // Unknown category: deny rather than serve something no rule covers.
       return res.status(403).json({ message: 'Accès refusé' });
     }
 
-    const allowed = await rule(req.user, storedPathFor(relative));
+    const allowed = await rule(req.user, storedPathFor(normalised));
     if (!allowed) {
       return res.status(403).json({ message: 'Accès refusé' });
     }
@@ -123,7 +129,7 @@ router.get(/^\/(.*)/, protect, async (req, res) => {
     return res.sendFile(absolute);
   } catch (error) {
     console.error('Error serving upload:', error);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

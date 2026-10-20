@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { clientAPI } from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
+import { canCreateUnite } from '../../utils/permissions';
 import './UniteModal.css';
 
 function UniteModal({ client, onClose, onSuccess }) {
@@ -13,7 +14,9 @@ function UniteModal({ client, onClose, onSuccess }) {
   const [showAddUnite, setShowAddUnite] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { isRH, isAdmin } = useContext(AuthContext);
+  const { isRH, isAdmin, user } = useContext(AuthContext);
+  // Unités and sous-titres share one rule on the server (client.js).
+  const canAdd = canCreateUnite(user?.role);
 
   const unites = client.unites || [];
 
@@ -80,7 +83,7 @@ function UniteModal({ client, onClose, onSuccess }) {
       setPhone('');
       onSuccess();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to add unite');
+      setError(error.response?.data?.message || "Impossible d'ajouter l'unité");
     } finally {
       setLoading(false);
     }
@@ -102,7 +105,7 @@ function UniteModal({ client, onClose, onSuccess }) {
       setSousTitreName('');
       onSuccess();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to add sous-titre');
+      setError(error.response?.data?.message || "Impossible d'ajouter le sous-titre");
     } finally {
       setLoading(false);
     }
@@ -154,6 +157,7 @@ function UniteModal({ client, onClose, onSuccess }) {
           </div>
 
           {/* Toggle Buttons */}
+          {canAdd && (
           <div className="toggle-buttons">
             <button 
               className={showAddUnite ? 'toggle-active' : 'toggle-btn'}
@@ -170,9 +174,10 @@ function UniteModal({ client, onClose, onSuccess }) {
               ➕ Ajouter Sous-titre
             </button>
           </div>
+          )}
 
           {/* Add Unite Form */}
-          {showAddUnite && (
+          {canAdd && showAddUnite && (
             <form onSubmit={handleAddUnite} className="add-unite-form">
               <h3>Ajouter une Nouvelle Unité</h3>
               
@@ -232,7 +237,7 @@ function UniteModal({ client, onClose, onSuccess }) {
           )}
 
           {/* Add Sous-titre Form */}
-          {!showAddUnite && (
+          {canAdd && !showAddUnite && (
             <form onSubmit={handleAddSousTitre} className="add-unite-form">
               <h3>Ajouter un Sous-titre</h3>
 

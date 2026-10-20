@@ -107,7 +107,7 @@ router.get('/employees', protect, authorize('rh', 'admin', 'employer', 'responsa
       .sort({ createdAt: -1 });
     res.json({ success: true, count: employees.length, data: employees });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -142,12 +142,12 @@ router.post('/employees', protect, authorize('rh', 'admin', 'responsable'), uplo
     // Check if user exists
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ message: 'Email already exists' });
+      return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
     user = await User.findOne({ cin });
     if (user) {
-      return res.status(400).json({ message: 'CIN already registered' });
+      return res.status(400).json({ message: 'Ce CIN est déjà enregistré' });
     }
 
     // Hash password
@@ -192,7 +192,7 @@ router.post('/employees', protect, authorize('rh', 'admin', 'responsable'), uplo
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -205,12 +205,12 @@ router.get('/employees/:id', protect, authorize('rh', 'admin', 'employer', 'resp
 
 
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: 'Employé introuvable' });
     }
 
     res.json({ success: true, data: employee });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -222,7 +222,7 @@ router.put('/employees/:id', protect, authorize('rh', 'admin', 'responsable'), u
   try {
     const employee = await User.findById(req.params.id);
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: 'Employé introuvable' });
     }
 
     // An administrator's account may only be edited by another administrator.
@@ -270,7 +270,7 @@ router.put('/employees/:id', protect, authorize('rh', 'admin', 'responsable'), u
     res.json({ success: true, data: updated });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -301,12 +301,12 @@ router.put('/employees/:id/availability', protect, authorize('rh', 'admin', 'res
     ).select('-password');
 
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: 'Employé introuvable' });
     }
 
     res.json({ success: true, data: employee });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -335,12 +335,12 @@ router.post('/employees/:id/prime', protect, authorize('rh', 'admin', 'responsab
     ).select('-password');
 
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: 'Employé introuvable' });
     }
 
     res.json({ success: true, data: employee });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -355,7 +355,7 @@ router.delete('/employees/:id', protect, authorize('admin'), async (req, res) =>
 
     const target = await User.findById(req.params.id);
     if (!target) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: 'Employé introuvable' });
     }
 
     if (target.role === 'admin') {
@@ -394,14 +394,14 @@ router.delete('/employees/:id', protect, authorize('admin'), async (req, res) =>
     const employee = await User.findByIdAndDelete(req.params.id);
 
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: 'Employé introuvable' });
     }
 
     removeStoredFiles([employee.photo, employee.cinImage]);
 
-    res.json({ success: true, message: 'Employee deleted' });
+    res.json({ success: true, message: 'Employé supprimé' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -424,7 +424,7 @@ router.get('/my-access-requests', protect, async (req, res) => {
 
     res.json({ success: true, count: requests.length, data: requests });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -437,7 +437,7 @@ router.get('/access-requests', protect, authorize('rh', 'admin', 'responsable'),
 
     res.json({ success: true, count: requests.length, data: requests });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -453,7 +453,7 @@ router.get('/access-requests/:id', protect, authorize('rh', 'admin', 'responsabl
 
     res.json({ success: true, data: accessRequest });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -493,7 +493,7 @@ router.post('/access-requests', protect, authorize('rh', 'admin', 'responsable')
     res.status(201).json({ success: true, data: populatedRequest });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -517,7 +517,7 @@ router.patch('/access-requests/:id/status', protect, authorize('rh', 'admin'), a
 
     res.json({ success: true, data: accessRequest });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -532,7 +532,7 @@ router.put('/access-requests/:id', protect, authorize('rh', 'admin', 'responsabl
     const accessRequest = await AccessRequest.findById(req.params.id);
 
     if (!accessRequest) {
-      return res.status(404).json({ message: 'Access request not found' });
+      return res.status(404).json({ message: "Demande d'accès introuvable" });
     }
 
     // Whitelist: passing req.body straight through also let a caller set
@@ -559,7 +559,7 @@ router.put('/access-requests/:id', protect, authorize('rh', 'admin', 'responsabl
     res.json({ success: true, data: populated });
   } catch (error) {
     console.error('Error updating access request:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -569,15 +569,15 @@ router.delete('/access-requests/:id', protect, authorize('rh', 'admin', 'respons
     const accessRequest = await AccessRequest.findByIdAndDelete(req.params.id);
 
     if (!accessRequest) {
-      return res.status(404).json({ message: 'Access request not found' });
+      return res.status(404).json({ message: "Demande d'accès introuvable" });
     }
 
     // The generated permit was left on disk after the record was removed.
     removeStoredFile(accessRequest.docxPath);
 
-    res.json({ success: true, message: 'Access request deleted' });
+    res.json({ success: true, message: "Demande d'accès supprimée" });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -638,7 +638,7 @@ router.post('/conge', protect, uploadConge.single('pieceJointe'), async (req, re
     res.status(201).json({ success: true, data: conge });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -649,7 +649,7 @@ router.get('/my-conge', protect, async (req, res) => {
     const solde = await calcSolde(req.user.id);
     res.json({ success: true, data: conges, solde, totalDays: ANNUAL_CONGE_DAYS });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -661,7 +661,7 @@ router.get('/conge', protect, authorize('rh', 'admin', 'responsable'), async (re
       .sort({ createdAt: -1 });
     res.json({ success: true, data: conges });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -696,7 +696,7 @@ router.patch('/conge/:id/status', protect, authorize('rh', 'admin'), async (req,
     await conge.populate('employee', 'name email cin');
     res.json({ success: true, data: conge });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -710,12 +710,21 @@ router.delete('/conge/:id', protect, async (req, res) => {
     if (!isOwner && !isPrivileged) {
       return res.status(403).json({ message: 'Non autorisé' });
     }
+    // An employee may withdraw a request only while it is pending. Deleting an
+    // approved one took it out of calcSolde's "used" total and handed the days
+    // back to their balance; the UI only offered the button on pending ones,
+    // but the API did not check.
+    if (!isPrivileged && conge.status !== 'pending') {
+      return res.status(403).json({
+        message: 'Seule une demande en attente peut être supprimée. Contactez les RH.',
+      });
+    }
     await conge.deleteOne();
     // The attachment used to stay on disk after the request was deleted.
     removeStoredFile(conge.pieceJointe);
     res.json({ success: true, message: 'Demande supprimée' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -725,7 +734,7 @@ router.get('/employees/:id/solde', protect, authorize('rh', 'admin'), async (req
     const solde = await calcSolde(req.params.id);
     res.json({ success: true, solde, totalDays: ANNUAL_CONGE_DAYS });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -753,7 +762,7 @@ router.get('/conge/soldes', protect, authorize('rh', 'admin', 'comptable'), asyn
 
     res.json({ success: true, soldes, totalDays: ANNUAL_CONGE_DAYS });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

@@ -4,6 +4,7 @@ import { planningAPI } from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
 import PlanningForm from './PlanningForm';
 import './PlanningList.css';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 function PlanningList() {
   const [plannings, setPlannings] = useState([]);
@@ -26,6 +27,7 @@ function PlanningList() {
       setLoading(false);
     }
   };
+  useAutoRefresh(fetchPlannings);
 
   const handleEdit = (planning) => {
     setEditData(planning);
@@ -191,13 +193,17 @@ function PlanningList() {
                           >
                             <span className="material-symbols-outlined">edit</span>
                           </button>
-                          <button
-                            onClick={() => handleDelete(planning._id)}
-                            className="btn-action btn-delete"
-                            title="Supprimer"
-                          >
-                            <span className="material-symbols-outlined">delete</span>
-                          </button>
+                          {/* Deleting a task is admin-only on the server, so an
+                              RH user only ever got a 403 from this button. */}
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleDelete(planning._id)}
+                              className="btn-action btn-delete"
+                              title="Supprimer"
+                            >
+                              <span className="material-symbols-outlined">delete</span>
+                            </button>
+                          )}
                         </>
                       )}
                     </div>

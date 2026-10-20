@@ -72,7 +72,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Email ou CIN déjà utilisé' });
     }
     console.error('Error during bootstrap registration:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -83,7 +83,11 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    // Both must be plain strings. A JSON object such as {"$ne": null} as the
+    // email reached User.findOne as a query operator and matched the first
+    // account, so its password could be guessed without knowing the address;
+    // a non-string password made bcrypt throw a 500.
+    if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
       return res.status(400).json({ message: 'Email et mot de passe requis' });
     }
 
@@ -95,7 +99,7 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, hash);
 
     if (!user || !isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Email ou mot de passe incorrect' });
     }
 
     res.json({
@@ -112,7 +116,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -124,7 +128,7 @@ router.get('/me', protect, async (req, res) => {
     const user = await User.findById(req.user.id).select('-password');
     res.json({ success: true, user });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -134,7 +138,7 @@ router.get('/me', protect, async (req, res) => {
 router.put('/change-password', protect, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    if (!currentPassword || !newPassword) {
+    if (typeof currentPassword !== 'string' || !currentPassword || !newPassword) {
       return res.status(400).json({ message: 'Mot de passe actuel et nouveau requis' });
     }
 
@@ -155,7 +159,7 @@ router.put('/change-password', protect, async (req, res) => {
 
     res.json({ success: true, message: 'Mot de passe modifié avec succès' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

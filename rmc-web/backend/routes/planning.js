@@ -16,7 +16,7 @@ router.get('/', protect, async (req, res) => {
 
     res.json({ success: true, data: planning });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -27,7 +27,7 @@ router.get('/materiels/distinct', protect, async (req, res) => {
     const filtered = materiels.filter(m => m && m.trim() !== '');
     res.json({ success: true, data: filtered });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -40,12 +40,12 @@ router.get('/:id', protect, async (req, res) => {
       .populate('client', 'name clientNumber email');
 
     if (!planning) {
-      return res.status(404).json({ message: 'Planning not found' });
+      return res.status(404).json({ message: 'Tâche introuvable' });
     }
 
     res.json({ success: true, data: planning });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -89,7 +89,7 @@ router.post('/', protect, authorize('rh', 'admin', 'responsable', 'comptable'), 
     res.status(201).json({ success: true, data: populatedPlanning });
   } catch (error) {
     console.error('Error creating planning:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 });
 
@@ -110,12 +110,12 @@ router.delete('/:id', protect, authorize('admin'), async (req, res) => {
     const planning = await Planning.findByIdAndDelete(req.params.id);
 
     if (!planning) {
-      return res.status(404).json({ message: 'Planning not found' });
+      return res.status(404).json({ message: 'Tâche introuvable' });
     }
 
-    res.json({ success: true, message: 'Planning deleted' });
+    res.json({ success: true, message: 'Tâche supprimée' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -133,10 +133,11 @@ router.put('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
     let planning = await Planning.findById(req.params.id);
 
     if (!planning) {
-      return res.status(404).json({ message: 'Planning not found' });
+      return res.status(404).json({ message: 'Tâche introuvable' });
     }
 
-    const wasCompleted = planning.status === 'completed';
+    const previousStatus = planning.status;
+    const wasCompleted = previousStatus === 'completed';
     const isNowCompleted = req.body.status === 'completed';
 
     const updates = { updatedAt: Date.now() };
@@ -155,63 +156,75 @@ router.put('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
 
     // If status changed to 'completed', add to Bon de Réception
     if (!wasCompleted && isNowCompleted && planning.client) {
-      const BonDeReception = require('../models/BonDeReception');
+      // The status is already saved as completed at this point. If adding the
+      // task to a bon fails, put the old status back: otherwise a retry sees
+      // wasCompleted and skips this step, and the work never reaches a bon or
+      // an invoice.
+      try {
+        const BonDeReception = require('../models/BonDeReception');
 
-      // A task toggled completed -> pending -> completed would otherwise be
-      // added to the bon twice.
-      const alreadyOnBon = await BonDeReception.exists({
-        'taches.planning': planning._id
-      });
+        // A task toggled completed -> pending -> completed would otherwise be
+        // added to the bon twice.
+        const alreadyOnBon = await BonDeReception.exists({
+          'taches.planning': planning._id
+        });
 
-      if (!alreadyOnBon) {
-        const tache = {
-          planning: planning._id,
-          description: planning.description,
-          materielsNecessaires: planning.materielsNecessaires,
-          quantite: planning.quantite,
-          uniteQuantite: planning.uniteQuantite,
-          dateCompleted: Date.now(),
-          assignedWorkers: planning.assignedWorkers
-        };
+        if (!alreadyOnBon) {
+          const tache = {
+            planning: planning._id,
+            description: planning.description,
+            materielsNecessaires: planning.materielsNecessaires,
+            quantite: planning.quantite,
+            uniteQuantite: planning.uniteQuantite,
+            dateCompleted: Date.now(),
+            assignedWorkers: planning.assignedWorkers
+          };
 
-        // Append to the open slip for this unit if there is one. A conditional
-        // update avoids the read-then-write window where two tasks completed at
-        // once would each create their own slip.
-        const appended = await BonDeReception.findOneAndUpdate(
-          {
-            client: planning.client._id,
-            uniteNumber: planning.uniteNumber,
-            status: 'active'
-          },
-          { $push: { taches: tache } },
-          { new: true }
-        );
-
-        if (!appended) {
-          // No open slip: create one. The number comes from a pre-validate hook
-          // that reads the current maximum, so a fresh document is built on each
-          // retry; reusing the same one would carry the rejected number forward.
-          await withDuplicateRetry(async () => {
-            const doc = new BonDeReception({
+          // Append to the open slip for this unit if there is one. A conditional
+          // update avoids the read-then-write window where two tasks completed at
+          // once would each create their own slip.
+          const appended = await BonDeReception.findOneAndUpdate(
+            {
               client: planning.client._id,
-              clientName: planning.clientName,
-              clientNumber: planning.client.clientNumber,
-              unite: planning.unite,
               uniteNumber: planning.uniteNumber,
-              status: 'active',
-              taches: [tache]
+              status: 'active'
+            },
+            { $push: { taches: tache } },
+            { new: true }
+          );
+
+          if (!appended) {
+            // No open slip: create one. The number comes from a pre-validate hook
+            // that reads the current maximum, so a fresh document is built on each
+            // retry; reusing the same one would carry the rejected number forward.
+            await withDuplicateRetry(async () => {
+              const doc = new BonDeReception({
+                client: planning.client._id,
+                clientName: planning.clientName,
+                clientNumber: planning.client.clientNumber,
+                unite: planning.unite,
+                uniteNumber: planning.uniteNumber,
+                status: 'active',
+                taches: [tache]
+              });
+              await doc.save();
+              return doc;
             });
-            await doc.save();
-            return doc;
-          });
+          }
         }
+      } catch (bonError) {
+        console.error('Adding task to bon failed, reverting status:', bonError);
+        await Planning.updateOne({ _id: planning._id }, { status: previousStatus });
+        return res.status(500).json({
+          message: "La tâche n'a pas pu être ajoutée au bon de réception. Réessayez.",
+        });
       }
     }
 
     res.json({ success: true, data: planning });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 module.exports = router;
