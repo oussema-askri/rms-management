@@ -4,9 +4,7 @@ import { rhAPI } from '../../services/api';
 import '../rh/CongeList.css';
 import { openFile } from '../../services/files';
 import useAutoRefresh from '../../hooks/useAutoRefresh';
-
-
-const statusLabel = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
+import StatusBadge from '../shared/StatusBadge';
 
 // Calendar days, both ends included, weekends counted: the same rule the
 // server uses (inclusiveDayCount in routes/rh.js) when it checks the balance.
@@ -15,7 +13,6 @@ const dayCount = (start, end) => {
   const days = Math.round((Date.parse(end) - Date.parse(start)) / 86400000) + 1;
   return days > 0 ? days : 0;
 };
-const statusClass = { pending: 'status-pending', approved: 'status-approved', rejected: 'status-rejected' };
 
 function MyCongeList() {
   const [conges, setConges] = useState([]);
@@ -156,15 +153,13 @@ function MyCongeList() {
                       ) : <span className="text-muted">—</span>}
                     </td>
                     <td>
-                      <span className={`status-badge ${statusClass[c.status]}`}>
-                        {statusLabel[c.status]}
-                      </span>
+                      <StatusBadge status={c.status} />
                     </td>
                     <td>{c.rhComment || <span className="text-muted">—</span>}</td>
                     <td>
                       {c.status === 'pending' && (
-                        <button className="btn-action btn-delete" onClick={() => handleDelete(c._id)}>
-                          🗑
+                        <button className="btn-action btn-delete" title="Retirer la demande" onClick={() => handleDelete(c._id)}>
+                          <span className="material-symbols-outlined">delete</span>
                         </button>
                       )}
                     </td>

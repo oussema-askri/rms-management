@@ -4,6 +4,7 @@ import { rhAPI } from '../../services/api';
 import '../rh/AccessRequestList.css';
 import { openFile } from '../../services/files';
 import useAutoRefresh from '../../hooks/useAutoRefresh';
+import StatusBadge from '../shared/StatusBadge';
 
 
 function MyAccessRequestList() {
@@ -157,9 +158,7 @@ function MyAccessRequestList() {
                     )}
                   </td>
                   <td>
-                    <span className="status-badge" style={{ backgroundColor: '#27976A' }}>
-                      Approuvé
-                    </span>
+                    <StatusBadge status="approved" />
                   </td>
                   <td>
                     <div className="cell-primary">{request.createdBy?.name || '—'}</div>
@@ -177,7 +176,7 @@ function MyAccessRequestList() {
                           className="btn-action btn-download"
                           title="Télécharger"
                         >
-                          ↓
+                          <span className="material-symbols-outlined">download</span>
                         </button>
                       ) : (
                         <span className="text-muted">—</span>

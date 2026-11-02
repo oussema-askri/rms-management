@@ -150,13 +150,13 @@
   font-family: var(--font-headline);
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 12px rgba(120, 90, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 54, 100, 0.25);
 }
 
 .login-button:hover {
   opacity: 0.92;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(120, 90, 0, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 54, 100, 0.3);
 }
 
 .login-button:active {

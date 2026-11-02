@@ -141,7 +141,7 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(120, 90, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 54, 100, 0.2);
 }
 
 .btn-fact-primary:hover:not(:disabled) {

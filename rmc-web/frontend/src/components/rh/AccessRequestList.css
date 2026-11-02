@@ -257,26 +257,28 @@
   white-space: nowrap;
 }
 
-/* ===== WORKERS CELL ===== */
-.workers-cell {
+/* ===== WORKERS CELL =====
+   Prefixed: PlanningList.css styles a global .workers-count as a round badge,
+   which landed on top of this cell's text. */
+.ar-workers {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
 }
 
-.workers-count {
+.ar-workers-count {
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
   color: var(--on-surface-variant);
 }
 
-.workers-preview {
+.ar-workers-preview {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.worker-chip {
+.ar-worker-chip {
   background: var(--primary-50);
   color: var(--primary-700);
   padding: 2px 6px;
@@ -285,21 +287,9 @@
   white-space: nowrap;
 }
 
-.worker-more {
+.ar-worker-more {
   font-size: 11px;
   color: var(--outline);
-}
-
-/* ===== STATUS BADGE ===== */
-.status-badge {
-  padding: 2px var(--space-md);
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  font-weight: var(--font-semibold);
-  color: white;
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
 }
 
 /* ===== ACTION BUTTONS ===== */

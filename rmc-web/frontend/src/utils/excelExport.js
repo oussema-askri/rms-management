@@ -1,3 +1,5 @@
+import { categoryLabel } from '../constants/expenses';
+
 export async function exportMonthlySummary(data, month) {
   const XLSX = await import('xlsx');
   const wb = XLSX.utils.book_new();
@@ -22,7 +24,7 @@ export async function exportMonthlySummary(data, month) {
     [],
     ['Dépenses par Catégorie'],
     ['Catégorie', 'Montant (TND)'],
-    ...data.financial.expensesByCategory.map(e => [e.category, e.total]),
+    ...data.financial.expensesByCategory.map(e => [categoryLabel(e.category), e.total]),
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(financialRows), 'Resume Financier');
 
@@ -47,7 +49,7 @@ export async function exportMonthlySummary(data, month) {
     new Date(e.createdAt).toLocaleDateString('fr-FR'),
     e.description,
     e.amount,
-    e.category || '',
+    categoryLabel(e.category) || '',
     statusLabels[e.status] || e.status,
     e.createdBy,
   ]);

@@ -7,6 +7,7 @@ import EmployeeList from '../components/rh/EmployeeList';
 import BonDeReceptionList from '../components/shared/BonDeReceptionList';
 import Facturation from '../components/rh/Facturation';
 import ProfilePage from '../components/shared/ProfilePage';
+import DashboardOverview from '../components/shared/DashboardOverview';
 import './Dashboard.css';
 import './DashboardWithSidebar.css';
 
@@ -69,43 +70,7 @@ function ComptableDashboard() {
         </div>
 
         <div className="content-body">
-          {activeTab === 'overview' && (
-            <div className="overview-content">
-              <div className="quick-actions-section">
-                <h2 className="section-title">Accès Rapide</h2>
-                <div className="quick-actions-grid">
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'expenses'}>
-                    <div className="action-content">
-                      <h3>Dépenses</h3>
-                      <p>Consulter toutes les dépenses</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'bon-reception'}>
-                    <div className="action-content">
-                      <h3>Bons de Réception</h3>
-                      <p>Consulter les bons</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'facturation'}>
-                    <div className="action-content">
-                      <h3>Facturation</h3>
-                      <p>Consulter et télécharger les factures</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'employees'}>
-                    <div className="action-content">
-                      <h3>Employés & Salaires</h3>
-                      <p>Consulter les salaires</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'overview' && <DashboardOverview role="comptable" />}
 
           {activeTab === 'expenses' && <ExpenseList />}
           {activeTab === 'bon-reception' && <BonDeReceptionList />}

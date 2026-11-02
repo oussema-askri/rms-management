@@ -167,8 +167,10 @@
   font-family: var(--font-label);
 }
 
+/* A fixed height, not aspect-ratio: 1. Square cells grew with the width of the
+   page, so on a wide screen the month needed three screens of scrolling. */
 .cal-day {
-  aspect-ratio: 1;
+  height: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -178,7 +180,6 @@
   transition: all var(--transition-fast);
   cursor: default;
   position: relative;
-  min-height: 50px;
 }
 .cal-day.blank {
   background: none;
@@ -191,19 +192,19 @@
 }
 
 .cal-day.today {
-  background: var(--primary-container);
+  box-shadow: inset 0 0 0 2px var(--primary-container);
 }
 .cal-day.today .cal-day-num {
-  color: var(--on-primary);
+  color: var(--primary);
   font-weight: 800;
 }
 
 .cal-day.has-conge {
-  background: rgba(39, 151, 106, 0.1);
+  background: var(--status-success-bg);
   cursor: pointer;
 }
 .cal-day.has-conge:hover {
-  background: rgba(39, 151, 106, 0.2);
+  background: #d3efe1;
   box-shadow: inset 0 0 0 2px var(--status-success);
 }
 

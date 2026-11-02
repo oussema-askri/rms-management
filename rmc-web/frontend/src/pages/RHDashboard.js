@@ -12,6 +12,7 @@ import Facturation from '../components/rh/Facturation';
 import ClientList from '../components/shared/ClientList';
 import BonDeReceptionList from '../components/shared/BonDeReceptionList';
 import ProfilePage from '../components/shared/ProfilePage';
+import DashboardOverview from '../components/shared/DashboardOverview';
 import './Dashboard.css';
 import './DashboardWithSidebar.css';
 
@@ -90,64 +91,7 @@ function RHDashboard() {
 
         {/* Main Content Area */}
         <div className="content-body">
-          {activeTab === 'overview' && (
-            <div className="overview-content">
-              {/* The leave balance banner was removed from the dashboard. */}
-              {/* Quick Actions */}
-              <div className="quick-actions-section">
-                <h2 className="section-title">Accès Rapide</h2>
-                <div className="quick-actions-grid">
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'clients'}>
-                    <div className="action-content">
-                      <h3>Clients</h3>
-                      <p>Gérer les clients et unités</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'planning'}>
-                    <div className="action-content">
-                      <h3>Planning</h3>
-                      <p>Voir toutes les tâches</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'bon-reception'}>
-                    <div className="action-content">
-                      <h3>Bons de Réception</h3>
-                      <p>Signer les bons</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'expenses'}>
-                    <div className="action-content">
-                      <h3>Dépenses</h3>
-                      <p>Approuver les dépenses</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'employees'}>
-                    <div className="action-content">
-                      <h3>Employés</h3>
-                      <p>Gérer les employés</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'access'}>
-                    <div className="action-content">
-                      <h3>Demandes d'Accès</h3>
-                      <p>Gérer les accès</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'overview' && <DashboardOverview role="rh" />}
 
           {activeTab === 'clients' && <ClientList />}
           {activeTab === 'taches' && <PlanningList />}

@@ -5,7 +5,7 @@ const path = require('path');
 const Expense = require('../models/Expense');
 const { protect, authorize } = require('../middleware/auth');
 const { uploadPath, toStoredPath } = require('../config/uploadDirs');
-const { removeStoredFile, discardUploads } = require('../utils/cleanup');
+const { removeStoredFile, discardUploads, discardUploadsOnFailure } = require('../utils/cleanup');
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -35,7 +35,7 @@ const upload = multer({
 });
 
 // Get expenses (employer sees only their own, RH/Admin see all)
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, async (req, res, next) => {
   try {
     let query = {};
 
@@ -51,12 +51,12 @@ router.get('/', protect, async (req, res) => {
 
     res.json({ success: true, count: expenses.length, data: expenses });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get single expense
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, async (req, res, next) => {
   try {
     const expense = await Expense.findById(req.params.id)
       .populate('createdBy', 'name email')
@@ -73,12 +73,12 @@ router.get('/:id', protect, async (req, res) => {
 
     res.json({ success: true, data: expense });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Create new expense
-router.post('/', protect, upload.single('facture'), async (req, res, next) => {
+router.post('/', protect, discardUploadsOnFailure, upload.single('facture'), async (req, res, next) => {
   try {
     const { description, amount, paymentMethod, category, notes } = req.body;
 
@@ -111,7 +111,7 @@ router.post('/', protect, upload.single('facture'), async (req, res, next) => {
 });
 
 // Update expense
-router.put('/:id', protect, async (req, res) => {
+router.put('/:id', protect, async (req, res, next) => {
   try {
     let expense = await Expense.findById(req.params.id);
 
@@ -153,12 +153,12 @@ router.put('/:id', protect, async (req, res) => {
 
     res.json({ success: true, data: expense });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Approve/Reject expense
-router.put('/:id/status', protect, authorize('rh', 'admin'), async (req, res) => {
+router.put('/:id/status', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const { status } = req.body; // 'approved' or 'rejected'
 
@@ -175,8 +175,9 @@ router.put('/:id/status', protect, authorize('rh', 'admin'), async (req, res) =>
     if (current.status !== 'pending') {
       return res.status(409).json({ message: 'Cette dépense a déjà été traitée.' });
     }
-    // Nobody approves their own spending.
-    if (current.createdBy.toString() === req.user.id) {
+    // RH does not decide on their own spending; an administrator does. The
+    // administrator has nobody above them, so they may decide on their own.
+    if (req.user.role !== 'admin' && current.createdBy.toString() === req.user.id) {
       return res.status(403).json({ message: 'Vous ne pouvez pas valider votre propre dépense.' });
     }
 
@@ -197,12 +198,12 @@ router.put('/:id/status', protect, authorize('rh', 'admin'), async (req, res) =>
 
     res.json({ success: true, data: expense });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Delete expense
-router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
+router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const expense = await Expense.findByIdAndDelete(req.params.id);
 
@@ -215,7 +216,7 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
 
     res.json({ success: true, message: 'Dépense supprimée' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 

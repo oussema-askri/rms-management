@@ -126,7 +126,8 @@ export const adminAPI = {
 };
 // Client API
 export const clientAPI = {
-  getAll: () => api.get('/clients'),
+  // { archived: 'true' } lists the archived clients instead of the active ones.
+  getAll: (params) => api.get('/clients', { params }),
   getOne: (id) => api.get(`/clients/${id}`),
   create: (formData) => api.post('/clients', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
@@ -135,6 +136,7 @@ export const clientAPI = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   delete: (id) => api.delete(`/clients/${id}`),
+  restore: (id) => api.patch(`/clients/${id}/restore`),
   addUnite: (id, data) => api.post(`/clients/${id}/unites`, data),
   deleteUnite: (clientId, uniteId) => api.delete(`/clients/${clientId}/unites/${uniteId}`),
   // NEW: Sous-titre methods

@@ -206,7 +206,7 @@ const ClientDetailScreen = ({ navigation, route }) => {
       {/* Financial Info */}
       <Card>
         <Text style={styles.sectionTitle}>💰 Informations financières</Text>
-        <InfoRow icon="📊" label="TVA" value={`${client.tvaPercentage || 19}%`} />
+        <InfoRow icon="📊" label="TVA" value={`${client.tvaPercentage ?? 19}%`} />
         <InfoRow icon="💳" label="Mode de paiement" value={client.modePaiement} />
         <InfoRow icon="💵" label="Devise" value={client.devise || 'TND'} />
       </Card>

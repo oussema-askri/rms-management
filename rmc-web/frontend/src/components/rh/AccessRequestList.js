@@ -6,6 +6,7 @@ import AccessRequestForm from './AccessRequestForm';
 import './AccessRequestList.css';
 import { openFile } from '../../services/files';
 import useAutoRefresh from '../../hooks/useAutoRefresh';
+import StatusBadge from '../shared/StatusBadge';
 
 function AccessRequestList() {
   const [requests, setRequests] = useState([]);
@@ -68,15 +69,7 @@ function AccessRequestList() {
     openFile(docPath);
   };
 
-  const getStatusBadge = (status) => {
-    const colors = { pending: '#C26B1E', approved: '#27976A', rejected: '#B53535' };
-    const labels = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
-    return (
-      <span className="status-badge" style={{ backgroundColor: colors[status] }}>
-        {labels[status] || status}
-      </span>
-    );
-  };
+  const getStatusBadge = (status) => <StatusBadge status={status} />;
 
   const filteredRequests = requests.filter(req => {
     if (!searchTerm) return true;
@@ -177,7 +170,7 @@ function AccessRequestList() {
                     </div>
                   </td>
                   <td>
-                    <span className="duration-badge">{request.duration || '—'}</span>
+                    {request.duration ? <span className="duration-badge">{request.duration}</span> : <span className="text-muted">—</span>}
                   </td>
                   <td>
                     <div className="cell-truncate" title={request.purpose}>
@@ -212,14 +205,14 @@ function AccessRequestList() {
                   </td>
                   <td>
                     {request.workers?.length > 0 ? (
-                      <div className="workers-cell">
-                        <span className="workers-count">{request.workers.length} ouvrier(s)</span>
-                        <div className="workers-preview">
+                      <div className="ar-workers">
+                        <span className="ar-workers-count">{request.workers.length} ouvrier(s)</span>
+                        <div className="ar-workers-preview">
                           {request.workers.slice(0, 2).map((w, i) => (
-                            <span key={i} className="worker-chip">{w.name}</span>
+                            <span key={i} className="ar-worker-chip">{w.name}</span>
                           ))}
                           {request.workers.length > 2 && (
-                            <span className="worker-more">+{request.workers.length - 2}</span>
+                            <span className="ar-worker-more">+{request.workers.length - 2}</span>
                           )}
                         </div>
                       </div>
@@ -245,14 +238,14 @@ function AccessRequestList() {
                             className="btn-action btn-approve"
                             title="Approuver"
                           >
-                            ✓
+                            <span className="material-symbols-outlined">check_circle</span>
                           </button>
                           <button
                             onClick={() => handleReject(request._id)}
                             className="btn-action btn-reject"
                             title="Rejeter"
                           >
-                            ✕
+                            <span className="material-symbols-outlined">cancel</span>
                           </button>
                         </>
                       )}
@@ -262,7 +255,7 @@ function AccessRequestList() {
                           className="btn-action btn-download"
                           title="Télécharger"
                         >
-                          ↓
+                          <span className="material-symbols-outlined">download</span>
                         </button>
                       )}
                       {(isRH || isAdmin) && (
@@ -271,7 +264,7 @@ function AccessRequestList() {
                           className="btn-action btn-delete"
                           title="Supprimer"
                         >
-                          ✕
+                          <span className="material-symbols-outlined">delete</span>
                         </button>
                       )}
                     </div>

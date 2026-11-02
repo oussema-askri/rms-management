@@ -4,10 +4,7 @@ import { rhAPI } from '../../services/api';
 import './CongeList.css';
 import { openFile } from '../../services/files';
 import useAutoRefresh from '../../hooks/useAutoRefresh';
-
-
-const statusLabel = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
-const statusClass = { pending: 'status-pending', approved: 'status-approved', rejected: 'status-rejected' };
+import StatusBadge from '../shared/StatusBadge';
 
 function CongeList() {
   const [conges, setConges] = useState([]);
@@ -287,9 +284,7 @@ function CongeList() {
             </div>
             <div className="detail-item">
               <span className="detail-label">Statut</span>
-              <span className={`status-badge ${statusClass[selectedConge.status]}`}>
-                {statusLabel[selectedConge.status]}
-              </span>
+              <StatusBadge status={selectedConge.status} />
             </div>
             {selectedConge.rhComment && (
               <div className="detail-item">
@@ -312,12 +307,12 @@ function CongeList() {
           </div>
           <div className="detail-actions">
             {selectedConge.status !== 'approved' && (
-              <button className="btn-action btn-approve" onClick={() => { handleStatus(selectedConge._id, 'approved'); setSelectedConge(null); }}>
+              <button className="btn-action btn-approve btn-labeled" onClick={() => { handleStatus(selectedConge._id, 'approved'); setSelectedConge(null); }}>
                 <span className="material-symbols-outlined" style={{fontSize: 14}}>check</span> Approuver
               </button>
             )}
             {selectedConge.status !== 'rejected' && (
-              <button className="btn-action btn-reject" onClick={() => { handleStatus(selectedConge._id, 'rejected'); setSelectedConge(null); }}>
+              <button className="btn-action btn-reject btn-labeled" onClick={() => { handleStatus(selectedConge._id, 'rejected'); setSelectedConge(null); }}>
                 <span className="material-symbols-outlined" style={{fontSize: 14}}>close</span> Rejeter
               </button>
             )}
@@ -380,9 +375,7 @@ function CongeList() {
                       ) : <span className="text-muted">—</span>}
                     </td>
                     <td>
-                      <span className={`status-badge ${statusClass[c.status]}`}>
-                        {statusLabel[c.status]}
-                      </span>
+                      <StatusBadge status={c.status} />
                     </td>
                     <td>
                       <input

@@ -13,7 +13,7 @@ const { monthStartUTC, monthEndUTC, monthLastDayISO, parseMonthParam } = require
 const { generateTemporaryPassword } = require('../utils/roles');
 
 // Get dashboard statistics
-router.get('/stats', protect, authorize('admin'), async (req, res) => {
+router.get('/stats', protect, authorize('admin'), async (req, res, next) => {
   try {
     // Independent queries, run together rather than one after another, as
     // /monthly-report already does: the dashboard waited on eight round trips.
@@ -60,13 +60,12 @@ router.get('/stats', protect, authorize('admin'), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get recent activities
-router.get('/recent-activity', protect, authorize('admin'), async (req, res) => {
+router.get('/recent-activity', protect, authorize('admin'), async (req, res, next) => {
   try {
     const [recentExpenses, recentPlanning, recentUsers] = await Promise.all([
       Expense.find()
@@ -92,7 +91,7 @@ router.get('/recent-activity', protect, authorize('admin'), async (req, res) => 
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
@@ -103,7 +102,7 @@ router.get('/recent-activity', protect, authorize('admin'), async (req, res) => 
 // Every reset used to set the password to "123456", which was also printed in
 // the web and mobile interfaces. Any account that had ever been reset and not
 // changed since could be signed into by anyone who knew the email address.
-router.post('/users/:id/reset-password', protect, authorize('admin'), async (req, res) => {
+router.post('/users/:id/reset-password', protect, authorize('admin'), async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -123,15 +122,14 @@ router.post('/users/:id/reset-password', protect, authorize('admin'), async (req
       message: `Mot de passe de ${user.name} réinitialisé. Communiquez-le en personne, il ne sera plus affiché.`
     });
   } catch (error) {
-    console.error('Error resetting password:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   GET /api/admin/monthly-report
 // @desc    Get aggregated monthly report data
 // @access  Admin only
-router.get('/monthly-report', protect, authorize('admin'), async (req, res) => {
+router.get('/monthly-report', protect, authorize('admin'), async (req, res, next) => {
   try {
     const { year, month } = parseMonthParam(req.query.month); // YYYY-MM
 
@@ -354,8 +352,7 @@ router.get('/monthly-report', protect, authorize('admin'), async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Monthly report error:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 

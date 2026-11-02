@@ -6,13 +6,18 @@ const User = require('../models/User');
 const { protect, authorize } = require('../middleware/auth');
 const { monthStartUTC, monthEndUTC } = require('../utils/dateRange');
 
+// Every pointage route takes the day as YYYY-MM-DD. Anything else built an
+// Invalid Date, which reached the query and came back as a server error.
+const isDay = (value) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+  && !isNaN(new Date(value + 'T00:00:00.000Z'));
+
 // @route   GET /api/pointage/planning-for-date?date=YYYY-MM-DD
 // @desc    Get planned tasks and workers for a specific date (pre-fill form)
 // @access  Responsable, Admin, RH
-router.get('/planning-for-date', protect, authorize('responsable', 'admin', 'rh'), async (req, res) => {
+router.get('/planning-for-date', protect, authorize('responsable', 'admin', 'rh'), async (req, res, next) => {
   try {
     const { date } = req.query;
-    if (!date) return res.status(400).json({ message: 'Date requise' });
+    if (!isDay(date)) return res.status(400).json({ message: 'Date requise (AAAA-MM-JJ)' });
 
     const dayStart = new Date(date + 'T00:00:00.000Z');
     const dayEnd = new Date(date + 'T23:59:59.999Z');
@@ -26,15 +31,14 @@ router.get('/planning-for-date', protect, authorize('responsable', 'admin', 'rh'
 
     res.json({ success: true, data: plannings });
   } catch (error) {
-    console.error('Error fetching planning for date:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   GET /api/pointage/employees
 // @desc    Get all employees (for adding unplanned workers)
 // @access  Responsable, Admin, RH
-router.get('/employees', protect, authorize('responsable', 'admin', 'rh'), async (req, res) => {
+router.get('/employees', protect, authorize('responsable', 'admin', 'rh'), async (req, res, next) => {
   try {
     const employees = await User.find({ role: { $in: ['employer', 'responsable'] } })
       .select('name role employeeType')
@@ -42,18 +46,32 @@ router.get('/employees', protect, authorize('responsable', 'admin', 'rh'), async
       .lean();
     res.json({ success: true, data: employees });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   POST /api/pointage
 // @desc    Create or update daily pointage
 // @access  Responsable, Admin
-router.post('/', protect, authorize('responsable', 'admin'), async (req, res) => {
+router.post('/', protect, authorize('responsable', 'admin'), async (req, res, next) => {
   try {
     const { date, entries } = req.body;
-    if (!date || !entries || !Array.isArray(entries)) {
+    if (!isDay(date) || !Array.isArray(entries)) {
       return res.status(400).json({ message: 'Date et lignes de pointage requises' });
+    }
+
+    // One line per worker: the same person marked twice, possibly once present
+    // and once absent, made the sheet contradict itself.
+    const seen = new Set();
+    for (const entry of entries) {
+      const id = entry && entry.worker ? String(entry.worker) : '';
+      if (!id) continue; // the model rejects it with a clear message
+      if (seen.has(id)) {
+        return res.status(400).json({
+          message: `${entry.workerName || 'Un travailleur'} figure deux fois dans ce pointage.`
+        });
+      }
+      seen.add(id);
     }
 
     const dayDate = new Date(date + 'T00:00:00.000Z');
@@ -85,18 +103,17 @@ router.post('/', protect, authorize('responsable', 'admin'), async (req, res) =>
     if (error.code === 11000) {
       return res.status(400).json({ message: 'Un pointage existe déjà pour cette date' });
     }
-    console.error('Error saving pointage:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   GET /api/pointage/my?date=YYYY-MM-DD
 // @desc    Get my pointage for a specific date
 // @access  Responsable, Admin
-router.get('/my', protect, authorize('responsable', 'admin'), async (req, res) => {
+router.get('/my', protect, authorize('responsable', 'admin'), async (req, res, next) => {
   try {
     const { date } = req.query;
-    if (!date) return res.status(400).json({ message: 'Date requise' });
+    if (!isDay(date)) return res.status(400).json({ message: 'Date requise (AAAA-MM-JJ)' });
 
     const dayDate = new Date(date + 'T00:00:00.000Z');
 
@@ -107,17 +124,17 @@ router.get('/my', protect, authorize('responsable', 'admin'), async (req, res) =
 
     res.json({ success: true, data: pointage });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   GET /api/pointage/duplicate?date=YYYY-MM-DD
 // @desc    Get previous day's pointage for duplication
 // @access  Responsable, Admin
-router.get('/duplicate', protect, authorize('responsable', 'admin'), async (req, res) => {
+router.get('/duplicate', protect, authorize('responsable', 'admin'), async (req, res, next) => {
   try {
     const { date } = req.query;
-    if (!date) return res.status(400).json({ message: 'Date requise' });
+    if (!isDay(date)) return res.status(400).json({ message: 'Date requise (AAAA-MM-JJ)' });
 
     const currentDate = new Date(date + 'T00:00:00.000Z');
 
@@ -131,14 +148,14 @@ router.get('/duplicate', protect, authorize('responsable', 'admin'), async (req,
 
     res.json({ success: true, data: previous });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   GET /api/pointage/all
 // @desc    Get all pointage records (admin view) with optional filters
 // @access  Admin, RH
-router.get('/all', protect, authorize('admin', 'rh'), async (req, res) => {
+router.get('/all', protect, authorize('admin', 'rh'), async (req, res, next) => {
   try {
     const { month, responsableId } = req.query;
     const filter = {};
@@ -165,7 +182,7 @@ router.get('/all', protect, authorize('admin', 'rh'), async (req, res) => {
 
     res.json({ success: true, data: pointages });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
@@ -174,7 +191,7 @@ router.get('/all', protect, authorize('admin', 'rh'), async (req, res) => {
 // @access  Admin, RH, Responsable (own)
 // Attendance sheets name who was present or absent and why, so employers and
 // accounting have no reason to read arbitrary ones.
-router.get('/:id', protect, authorize('admin', 'rh', 'responsable'), async (req, res) => {
+router.get('/:id', protect, authorize('admin', 'rh', 'responsable'), async (req, res, next) => {
   try {
     const pointage = await DailyPointage.findById(req.params.id)
       .populate('createdBy', 'name role')
@@ -191,20 +208,20 @@ router.get('/:id', protect, authorize('admin', 'rh', 'responsable'), async (req,
 
     res.json({ success: true, data: pointage });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   DELETE /api/pointage/:id
 // @desc    Delete pointage
 // @access  Admin only
-router.delete('/:id', protect, authorize('admin'), async (req, res) => {
+router.delete('/:id', protect, authorize('admin'), async (req, res, next) => {
   try {
     const pointage = await DailyPointage.findByIdAndDelete(req.params.id);
     if (!pointage) return res.status(404).json({ message: 'Pointage introuvable' });
     res.json({ success: true, message: 'Pointage supprimé' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 

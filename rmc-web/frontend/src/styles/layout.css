@@ -1,0 +1,66 @@
+/* ==========================================
+   Page-level layout shared by every dashboard.
+   Selectors start with `.main-content div.` so they outrank each list's own
+   unscoped rules without !important.
+   ========================================== */
+
+/* The dashboard header already names the page ("Gestion des Dépenses"), and
+   every list repeated that title in a card of its own just below. The card
+   becomes a slim toolbar: the count on the left, the main action on the right. */
+.main-content div.list-header {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0 0 var(--space-xs);
+  min-height: 40px;
+}
+.main-content div.list-header h2 {
+  display: none;
+}
+.main-content div.list-header .subtitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--on-surface-variant);
+}
+
+/* ===== LIST SUMMARY TILES =====
+   Expenses, access requests, bons and employees each open with a row of
+   counters (.stat-item). They were centred blocks with a dark left border;
+   they now read as compact tiles with a coloured accent matching the status
+   palette, the value first and its label beneath. */
+.main-content div.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  padding: 16px 20px;
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-left: 4px solid var(--primary-container);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  text-align: left;
+}
+.main-content div.stat-item .stat-value {
+  font-family: var(--font-headline);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--on-surface);
+}
+.main-content div.stat-item .stat-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--on-surface-variant);
+}
+.main-content div.stat-item.stat-pending { border-left-color: var(--status-warning); }
+.main-content div.stat-item.stat-approved,
+.main-content div.stat-item.stat-signed,
+.main-content div.stat-item.stat-available { border-left-color: var(--status-success); }
+.main-content div.stat-item.stat-rejected,
+.main-content div.stat-item.stat-unavailable { border-left-color: var(--status-danger); }
+.main-content div.stat-item.stat-active { border-left-color: var(--status-info); }

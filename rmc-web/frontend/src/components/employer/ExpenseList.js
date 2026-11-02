@@ -6,6 +6,8 @@ import ExpenseForm from './ExpenseForm';
 import './ExpenseList.css';
 import { openFile } from '../../services/files';
 import useAutoRefresh from '../../hooks/useAutoRefresh';
+import StatusBadge from '../shared/StatusBadge';
+import { categoryLabel } from '../../constants/expenses';
 
 function ExpenseList() {
   const [expenses, setExpenses] = useState([]);
@@ -18,8 +20,9 @@ function ExpenseList() {
   const { isAdmin, isRH, user } = useContext(AuthContext);
   // Login returns the user as { id }, /auth/me as { _id }; accept either.
   const myId = user?._id || user?.id;
-  // The server refuses to let anyone decide their own expense.
+  // The server refuses to let RH decide their own expense; an administrator may.
   const isMine = (expense) => String(expense.createdBy?._id || expense.createdBy) === String(myId);
+  const canDecide = (expense) => (isAdmin || isRH) && expense.status === 'pending' && (isAdmin || !isMine(expense));
 
   useEffect(() => {
     fetchExpenses();
@@ -69,19 +72,7 @@ function ExpenseList() {
 
   const viewFacture = (facturePath) => openFile(facturePath);
 
-  const getStatusBadge = (status) => {
-    const colors = {
-      pending: '#C26B1E',
-      approved: '#27976A',
-      rejected: '#B53535'
-    };
-    const labels = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' };
-    return (
-      <span className="status-badge" style={{ backgroundColor: colors[status] }}>
-        {labels[status] || status}
-      </span>
-    );
-  };
+  const getStatusBadge = (status) => <StatusBadge status={status} />;
 
   const getPaymentMethodLabel = (method) => {
     return method === 'espece' ? 'Espèce' : 'Virement';
@@ -251,7 +242,7 @@ function ExpenseList() {
                   <td>{getPaymentMethodLabel(expense.paymentMethod)}</td>
                   <td>
                     {expense.category ? (
-                      <span className="category-badge">{expense.category}</span>
+                      <span className="category-badge">{categoryLabel(expense.category)}</span>
                     ) : (
                       <span className="text-muted">—</span>
                     )}
@@ -280,25 +271,25 @@ function ExpenseList() {
                           className="btn-action btn-view"
                           title="Voir la facture"
                         >
-                          ◉
+                          <span className="material-symbols-outlined">visibility</span>
                         </button>
                       )}
 
-                      {(isAdmin || isRH) && expense.status === 'pending' && !isMine(expense) && (
+                      {canDecide(expense) && (
                         <>
                           <button
                             onClick={() => handleApprove(expense._id)}
                             className="btn-action btn-approve"
                             title="Approuver"
                           >
-                            ✓
+                            <span className="material-symbols-outlined">check_circle</span>
                           </button>
                           <button
                             onClick={() => handleReject(expense._id)}
                             className="btn-action btn-reject"
                             title="Rejeter"
                           >
-                            ✕
+                            <span className="material-symbols-outlined">cancel</span>
                           </button>
                         </>
                       )}
@@ -309,7 +300,7 @@ function ExpenseList() {
                           className="btn-action btn-delete"
                           title="Supprimer"
                         >
-                          ✕
+                          <span className="material-symbols-outlined">delete</span>
                         </button>
                       )}
                     </div>

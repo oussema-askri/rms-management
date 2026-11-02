@@ -10,15 +10,15 @@
 
 :root {
   /* ===== SURFACE HIERARCHY (M3 Tonal System) ===== */
-  --surface-bright: #fbf9f5;
-  --surface: #fbf9f5;
-  --surface-dim: #dbdad6;
+  --surface-bright: #f6f7f9;
+  --surface: #f6f7f9;
+  --surface-dim: #d9dde3;
   --surface-container-lowest: #ffffff;
-  --surface-container-low: #f5f3ef;
-  --surface-container: #f0eeea;
-  --surface-container-high: #eae8e4;
-  --surface-container-highest: #e4e2de;
-  --surface-variant: #e4e2de;
+  --surface-container-low: #f3f5f8;
+  --surface-container: #edf0f4;
+  --surface-container-high: #e5e9ef;
+  --surface-container-highest: #dde2e9;
+  --surface-variant: #dde2e9;
 
   /* ===== PRIMARY — Deep Navy ===== */
   --primary: #003664;
@@ -30,12 +30,12 @@
   --on-primary-fixed: #001c39;
 
   /* ===== SECONDARY — Warm Brass/Gold ===== */
-  --secondary: #785a00;
-  --secondary-container: #fece5c;
+  --secondary: #3d5f8a;
+  --secondary-container: #dbe7f5;
   --secondary-fixed: #ffdf9c;
   --secondary-fixed-dim: #efc050;
   --on-secondary: #ffffff;
-  --on-secondary-container: #745700;
+  --on-secondary-container: #234872;
   --on-secondary-fixed: #251a00;
 
   /* ===== TERTIARY ===== */
@@ -52,18 +52,21 @@
   --on-error-container: #93000a;
 
   /* ===== STATUS COLORS (Semantic) ===== */
-  --status-success: #27976A;
-  --status-success-bg: #e8f4ee;
-  --status-success-text: #165A3D;
-  --status-warning: #C26B1E;
-  --status-warning-bg: #faf0e6;
-  --status-warning-text: #773F11;
-  --status-danger: #B53535;
-  --status-danger-bg: #faecec;
-  --status-danger-text: #6E1E1E;
-  --status-info: #1E4D80;
-  --status-info-bg: #eef2f8;
-  --status-info-text: #163C66;
+  --status-success: #1f9d63;
+  --status-success-bg: #e6f6ee;
+  --status-success-text: #11643f;
+  --status-warning: #e08a00;
+  --status-warning-bg: #fff4dc;
+  --status-warning-text: #8a4f00;
+  --status-danger: #d64545;
+  --status-danger-bg: #fdeceb;
+  --status-danger-text: #a12424;
+  --status-info: #2f6fd0;
+  --status-info-bg: #e8f0fc;
+  --status-info-text: #1d4f8f;
+  --status-neutral: #8a94a3;
+  --status-neutral-bg: #eef0f3;
+  --status-neutral-text: #4b5563;
 
   /* Legacy color tokens (backward compat) */
   --primary-50: #EEF2F8;
@@ -121,9 +124,9 @@
   --danger-800: #4A1414;
   --danger-900: #270A0A;
 
-  --gray-50: #fbf9f5;
-  --gray-100: #f5f3ef;
-  --gray-200: #e4e2de;
+  --gray-50: #f6f7f9;
+  --gray-100: #f3f5f8;
+  --gray-200: #dde2e9;
   --gray-300: #c2c6d0;
   --gray-400: #9E9E9E;
   --gray-500: #737780;
@@ -133,26 +136,26 @@
   --gray-900: #1b1c1a;
 
   /* ===== ON-SURFACE ===== */
-  --on-surface: #1b1c1a;
-  --on-surface-variant: #42474f;
-  --on-background: #1b1c1a;
-  --outline: #737780;
-  --outline-variant: #c2c6d0;
+  --on-surface: #17202b;
+  --on-surface-variant: #4a5463;
+  --on-background: #17202b;
+  --outline: #6f7886;
+  --outline-variant: #d3d9e1;
   --inverse-surface: #30312e;
   --inverse-on-surface: #f2f0ec;
   --inverse-primary: #a3c9ff;
   --surface-tint: #356094;
 
   /* ===== GRADIENTS ===== */
-  --brass-gradient: linear-gradient(135deg, #785a00 0%, #745700 100%);
+  --brass-gradient: linear-gradient(135deg, #0f4c81 0%, #003664 100%);
   --gradient-primary: linear-gradient(135deg, #003664 0%, #1e4d80 100%);
   --gradient-primary-hover: linear-gradient(135deg, #001c39 0%, #003664 100%);
   --gradient-success: linear-gradient(135deg, #165A3D 0%, #27976A 100%);
   --gradient-warning: linear-gradient(135deg, #773F11 0%, #C26B1E 100%);
   --gradient-danger: linear-gradient(135deg, #6E1E1E 0%, #B53535 100%);
-  --gradient-secondary: linear-gradient(135deg, #785a00 0%, #745700 100%);
+  --gradient-secondary: linear-gradient(135deg, #0f4c81 0%, #003664 100%);
   --gradient-dark: linear-gradient(135deg, #30312e 0%, #1b1c1a 100%);
-  --gradient-light: linear-gradient(135deg, #f5f3ef 0%, #fbf9f5 100%);
+  --gradient-light: linear-gradient(135deg, #f3f5f8 0%, #f6f7f9 100%);
 
   /* ===== SHADOWS — Primary-Tinted Ambient ===== */
   --shadow-xs: 0 1px 2px rgba(0, 54, 100, 0.04);

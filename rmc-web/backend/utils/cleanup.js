@@ -52,6 +52,17 @@ const discardUploads = (req) => {
   });
 };
 
+// Route middleware, placed before multer: whatever the request uploaded is
+// deleted if the response turns out to be an error, from any return path.
+// Handlers had to remember to call discardUploads before each early return,
+// and most of them did not.
+const discardUploadsOnFailure = (req, res, next) => {
+  res.on('finish', () => {
+    if (res.statusCode >= 400) discardUploads(req);
+  });
+  next();
+};
+
 // Build the 409 body listing what still points at a record, so the user is told
 // why the deletion was refused rather than being left with a generic error.
 const blockedBy = (counts) => {
@@ -61,4 +72,4 @@ const blockedBy = (counts) => {
   return parts.length ? parts.join(', ') : null;
 };
 
-module.exports = { removeStoredFile, removeStoredFiles, discardUploads, blockedBy };
+module.exports = { removeStoredFile, removeStoredFiles, discardUploads, discardUploadsOnFailure, blockedBy };

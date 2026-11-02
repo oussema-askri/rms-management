@@ -1,0 +1,74 @@
+/* ==========================================
+   Row action buttons, the same on every list.
+
+   Each list styled its own .btn-action, and drew the icons as text characters:
+   reject and delete were both "✕", view was "◉". The selectors here start with
+   `button.` so they outrank those per-list rules without !important.
+   ========================================== */
+
+button.btn-action:not(.btn-labeled) {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+button.btn-action:not(.btn-labeled) .material-symbols-outlined {
+  font-size: 20px;
+  line-height: 1;
+}
+
+button.btn-action:not(.btn-labeled):hover {
+  background: var(--surface-container);
+  border-color: var(--outline-variant);
+  color: var(--on-surface);
+  transform: none;
+}
+
+button.btn-action:focus-visible {
+  outline: 2px solid var(--primary-container);
+  outline-offset: 1px;
+}
+
+button.btn-action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Decisions carry their colour at rest, so approve and reject read at a glance. */
+button.btn-action.btn-approve:not(.btn-labeled) { color: var(--status-success); }
+button.btn-action.btn-approve:not(.btn-labeled):hover {
+  background: var(--status-success-bg);
+  border-color: #c4e8d5;
+  color: var(--status-success-text);
+}
+
+button.btn-action.btn-reject:not(.btn-labeled) { color: var(--status-danger); }
+button.btn-action.btn-reject:not(.btn-labeled):hover {
+  background: var(--status-danger-bg);
+  border-color: #f5c6c4;
+  color: var(--status-danger-text);
+}
+
+button.btn-action.btn-sign:not(.btn-labeled) { color: var(--primary-container); }
+button.btn-action.btn-sign:not(.btn-labeled):hover:not(:disabled) {
+  background: var(--status-info-bg);
+  border-color: #c7daf6;
+  color: var(--primary);
+}
+
+/* Delete stays neutral until hovered, so it is not mistaken for "reject". */
+button.btn-action.btn-delete:not(.btn-labeled):hover {
+  background: var(--status-danger-bg);
+  border-color: #f5c6c4;
+  color: var(--status-danger);
+}

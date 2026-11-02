@@ -68,7 +68,7 @@
   font-size: var(--text-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 12px rgba(120, 90, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 54, 100, 0.25);
 }
 .btn-login-nav:hover {
   opacity: 0.9;
@@ -144,7 +144,7 @@
 .landing-page .btn-primary {
   background: var(--brass-gradient);
   color: white;
-  box-shadow: 0 4px 16px rgba(120, 90, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 54, 100, 0.3);
 }
 .landing-page .btn-primary:hover {
   opacity: 0.9;
@@ -484,7 +484,7 @@
   font-family: var(--font-headline);
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 20px rgba(120, 90, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 54, 100, 0.3);
 }
 .btn-cta:hover {
   opacity: 0.9;

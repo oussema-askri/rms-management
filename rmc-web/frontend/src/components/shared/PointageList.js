@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { pointageAPI } from '../../services/api';
 import './PointageForm.css';
 import useAutoRefresh from '../../hooks/useAutoRefresh';
+import StatusBadge from './StatusBadge';
 
 function PointageList() {
   const [pointages, setPointages] = useState([]);
@@ -44,23 +45,7 @@ function PointageList() {
     weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
   });
 
-  const getStatusBadge = (status) => {
-    const styles = {
-      present: { background: '#e8f4ee', color: '#165a3d' },
-      absent: { background: '#ffdad6', color: '#6e1e1e' },
-      late: { background: '#faf0e6', color: '#773f11' },
-    };
-    const labels = { present: 'Pr\u00e9sent', absent: 'Absent', late: 'Retard' };
-    const s = styles[status] || styles.present;
-    return (
-      <span style={{
-        display: 'inline-block', padding: '2px 8px', borderRadius: '4px',
-        fontSize: '12px', fontWeight: 600, ...s
-      }}>
-        {labels[status] || status}
-      </span>
-    );
-  };
+  const getStatusBadge = (status) => <StatusBadge status={status} />;
 
   return (
     <div className="pointage-form">

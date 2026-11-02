@@ -15,18 +15,21 @@ function ClientList() {
   const [editData, setEditData] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
+  const [notice, setNotice] = useState(null);
   const { isRH, isAdmin, user } = useContext(AuthContext);
   // POST /clients is restricted to these roles on the server.
   const canCreateClient = ['admin', 'rh', 'responsable', 'comptable'].includes(user?.role);
 
   useEffect(() => {
     fetchClients();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showArchived]);
 
   const fetchClients = async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoading(true);
-      const response = await clientAPI.getAll();
+      const response = await clientAPI.getAll(showArchived ? { archived: 'true' } : undefined);
       const clientsData = unwrapList(response);
       setClients(clientsData);
       return clientsData;
@@ -56,13 +59,31 @@ function ClientList() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Supprimer ce client? Cette action est irréversible.')) return;
+  // A client with tasks or bons is archived by the server rather than deleted,
+  // so its history stays intact. Either way it leaves this list, and the
+  // server's message says which happened. The old handler showed a bare
+  // "Échec de la suppression" whatever the reason.
+  const handleDelete = async (client) => {
+    if (!window.confirm(
+      `Supprimer le client « ${client.name} » ?\n\n` +
+      "S'il a des tâches ou des bons de réception, il sera archivé : il disparaît des listes mais son historique est conservé."
+    )) return;
     try {
-      await clientAPI.delete(id);
+      const response = await clientAPI.delete(client._id);
+      setNotice({ type: 'success', text: response.data?.message || 'Client supprimé' });
       fetchClients();
     } catch (error) {
-      alert('Échec de la suppression');
+      setNotice({ type: 'error', text: error.response?.data?.message || 'Échec de la suppression' });
+    }
+  };
+
+  const handleRestore = async (client) => {
+    try {
+      await clientAPI.restore(client._id);
+      setNotice({ type: 'success', text: `Client « ${client.name} » restauré.` });
+      fetchClients();
+    } catch (error) {
+      setNotice({ type: 'error', text: error.response?.data?.message || 'Échec de la restauration' });
     }
   };
 
@@ -99,10 +120,12 @@ function ClientList() {
       {/* Header */}
       <div className="list-header">
         <div>
-          <h2>Fichier Clients</h2>
-          <p className="subtitle">{clients.length} client(s) enregistré(s)</p>
+          <h2>{showArchived ? 'Clients archivés' : 'Fichier Clients'}</h2>
+          <p className="subtitle">
+            {showArchived ? `${clients.length} client(s) archivé(s)` : `${clients.length} client(s) enregistré(s)`}
+          </p>
         </div>
-        {canCreateClient && (
+        {canCreateClient && !showArchived && (
           <button onClick={() => setShowForm(true)} className="btn-new">
             <span className="material-symbols-outlined" style={{fontSize: 18}}>add</span>
             Nouveau Client
@@ -110,7 +133,18 @@ function ClientList() {
         )}
       </div>
 
-      {/* Search */}
+      {notice && (
+        <div className={`client-notice client-notice--${notice.type}`} role="status">
+          <span className="material-symbols-outlined">{notice.type === 'error' ? 'error' : 'check_circle'}</span>
+          <span>{notice.text}</span>
+          <button type="button" onClick={() => setNotice(null)} aria-label="Fermer">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      )}
+
+      {/* Search and active/archived switch */}
+      <div className="client-toolbar">
       <div className="search-bar">
         <span className="material-symbols-outlined search-icon">search</span>
         <input
@@ -121,12 +155,25 @@ function ClientList() {
           className="search-input"
         />
       </div>
+      {(isRH || isAdmin) && (
+        <div className="client-view-toggle" role="tablist">
+          <button type="button" role="tab" aria-selected={!showArchived}
+            className={!showArchived ? 'active' : ''} onClick={() => setShowArchived(false)}>
+            Actifs
+          </button>
+          <button type="button" role="tab" aria-selected={showArchived}
+            className={showArchived ? 'active' : ''} onClick={() => setShowArchived(true)}>
+            Archivés
+          </button>
+        </div>
+      )}
+      </div>
 
       {/* Client Cards Grid */}
       {filteredClients.length === 0 ? (
         <div className="no-data-card">
-          <p>Aucun client trouvé</p>
-          {canCreateClient && (
+          <p>{showArchived ? 'Aucun client archivé' : 'Aucun client trouvé'}</p>
+          {canCreateClient && !showArchived && (
             <button onClick={() => setShowForm(true)} className="btn-create-first">
               Créer le Premier Client
             </button>
@@ -135,7 +182,7 @@ function ClientList() {
       ) : (
         <div className="client-cards-grid">
           {filteredClients.map(client => (
-            <div key={client._id} className="client-card">
+            <div key={client._id} className={`client-card${client.archived ? ' is-archived' : ''}`}>
               {/* Card Header */}
               <div className="client-card-header">
                 <div className="client-card-identity">
@@ -145,9 +192,22 @@ function ClientList() {
                   <div>
                     <h3 className="client-card-name">{client.name}</h3>
                     <span className="client-number-badge">#{client.clientNumber}</span>
+                    {client.archived && <span className="client-archived-badge">Archivé</span>}
                   </div>
                 </div>
                 <div className="client-card-actions">
+                  {client.archived ? (
+                    (isRH || isAdmin) && (
+                      <button
+                        onClick={() => handleRestore(client)}
+                        className="btn-restore"
+                        title="Remettre ce client dans la liste active"
+                      >
+                        <span className="material-symbols-outlined">unarchive</span>
+                        Restaurer
+                      </button>
+                    )
+                  ) : (<>
                   <button
                     onClick={() => handleManageUnites(client)}
                     className="btn-icon"
@@ -166,13 +226,14 @@ function ClientList() {
                   )}
                   {(isRH || isAdmin) && (
                     <button
-                      onClick={() => handleDelete(client._id)}
+                      onClick={() => handleDelete(client)}
                       className="btn-icon btn-icon-danger"
                       title="Supprimer"
                     >
                       <span className="material-symbols-outlined">delete</span>
                     </button>
                   )}
+                  </>)}
                 </div>
               </div>
 
@@ -203,7 +264,7 @@ function ClientList() {
                 <div className="client-tags">
                   <span className="tag tag-primary">{client.devise || 'TND'}</span>
                   <span className="tag tag-outline">{client.modePaiement || 'N/A'}</span>
-                  <span className="tag tag-muted">TVA {client.tvaPercentage || 19}%</span>
+                  <span className="tag tag-muted">TVA {client.tvaPercentage ?? 19}%</span>
                 </div>
                 <div className="client-footer-meta">
                   <div className="units-badge" onClick={() => handleManageUnites(client)} title="Voir les unités">

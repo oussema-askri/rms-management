@@ -1,5 +1,7 @@
 /* Import Professional Design System */
 @import './styles/design-system.css';
+@import './styles/actions.css';
+@import './styles/layout.css';
 
 /* Render the whole app at 80% scale so a browser at 100% shows what 80% used
    to show. The stylesheets are overwhelmingly hardcoded px (about 1200 of them

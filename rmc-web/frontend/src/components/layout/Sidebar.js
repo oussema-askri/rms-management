@@ -94,6 +94,8 @@ const Sidebar = ({ userRole, onLogout }) => {
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <img src="/logo-rms.png" alt="RMS" className="sidebar-logo-img" />
+          {/* The collapsed sidebar is too narrow for the wordmark, which spilled over the page title. */}
+          <img src="/logo192.png" alt="RMS" className="sidebar-logo-mini" />
         </div>
       </div>
 

@@ -86,7 +86,7 @@ const rules = {
   },
 };
 
-router.get(/^\/(.*)/, protect, async (req, res) => {
+router.get(/^\/(.*)/, protect, async (req, res, next) => {
   try {
     const relative = req.params[0];
     if (!relative) return res.status(404).json({ message: 'Fichier introuvable' });

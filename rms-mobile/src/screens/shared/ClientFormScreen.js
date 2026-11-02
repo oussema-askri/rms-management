@@ -105,7 +105,8 @@ const ClientFormScreen = ({ navigation, route }) => {
         address: formData.address.trim() || '',
         telephone: formData.telephone.trim() || '',
         departement: formData.departement.trim() || '',
-        tvaPercentage: parseFloat(formData.tvaPercentage) || 19,
+        // `|| 19` turned an exempt client's 0% into 19%.
+        tvaPercentage: Number.isFinite(parseFloat(formData.tvaPercentage)) ? parseFloat(formData.tvaPercentage) : 19,
         modePaiement: formData.modePaiement || 'Virement',
         devise: formData.devise || 'TND',
       };

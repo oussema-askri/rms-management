@@ -13,7 +13,7 @@ function ClientForm({ onClose, onSuccess, editData }) {
     address: editData?.address || '',
     telephone: editData?.telephone || '',
     departement: editData?.departement || '',
-    tvaPercentage: editData?.tvaPercentage || 19,
+    tvaPercentage: editData?.tvaPercentage ?? 19, // `|| 19` showed an exempt client's 0% as 19%
     modePaiement: editData?.modePaiement || 'Virement',
     devise: editData?.devise || 'TND'
   });

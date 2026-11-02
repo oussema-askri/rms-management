@@ -8,7 +8,7 @@ const { withDuplicateRetry } = require('../utils/retry');
 const { removeStoredFile } = require('../utils/cleanup');
 
 // Get all Bons de Réception
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, async (req, res, next) => {
   try {
     const bons = await BonDeReception.find()
       .populate('client', 'name clientNumber email')
@@ -25,13 +25,12 @@ router.get('/', protect, async (req, res) => {
 
     res.json({ success: true, count: bons.length, data: bons });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get single Bon de Réception
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, async (req, res, next) => {
   try {
     const bon = await BonDeReception.findById(req.params.id)
       .populate('client', 'name clientNumber email address telephone')
@@ -47,12 +46,12 @@ router.get('/:id', protect, async (req, res) => {
 
     res.json({ success: true, data: bon });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get Bons by Client
-router.get('/client/:clientId', protect, async (req, res) => {
+router.get('/client/:clientId', protect, async (req, res, next) => {
   try {
     const bons = await BonDeReception.find({ client: req.params.clientId })
       .populate('signedBy', 'name email')
@@ -60,12 +59,12 @@ router.get('/client/:clientId', protect, async (req, res) => {
 
     res.json({ success: true, count: bons.length, data: bons });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Sign Bon de Réception (Lock it and generate DOCX)
-router.post('/:id/sign', protect, authorize('rh', 'admin'), async (req, res) => {
+router.post('/:id/sign', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const bon = await BonDeReception.findById(req.params.id)
       .populate('client', 'name clientNumber email address telephone')
@@ -95,12 +94,19 @@ router.post('/:id/sign', protect, authorize('rh', 'admin'), async (req, res) => 
       return res.status(500).json({ message: 'Échec de la génération du document' });
     }
 
-    // Lock the Bon
-    bon.status = 'signed';
-    bon.signedBy = req.user.id;
-    bon.signedAt = Date.now();
-
-    await bon.save();
+    // Lock the bon only if it is still the one the document was built from.
+    // Two people signing at once each opened a new active bon, and a task
+    // completed while the document was being generated landed on the signed
+    // bon without appearing in its document.
+    const locked = await BonDeReception.findOneAndUpdate(
+      { _id: bon._id, status: 'active', taches: { $size: bon.taches.length } },
+      { status: 'signed', signedBy: req.user.id, signedAt: Date.now(), docxPath: bon.docxPath }
+    );
+    if (!locked) {
+      return res.status(409).json({
+        message: "Ce bon vient d'être modifié ou signé par quelqu'un d'autre. Actualisez la page et réessayez."
+      });
+    }
 
     // Open the next active Bon for this unité. The bonNumber is left unset so
     // the model's pre-validate hook assigns it; this route used to duplicate
@@ -132,13 +138,12 @@ router.post('/:id/sign', protect, authorize('rh', 'admin'), async (req, res) => 
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    next(error);
   }
 });
 
 // Download Bon de Réception DOCX
-router.get('/:id/download', protect, async (req, res) => {
+router.get('/:id/download', protect, async (req, res, next) => {
   try {
     const bon = await BonDeReception.findById(req.params.id);
 
@@ -147,7 +152,7 @@ router.get('/:id/download', protect, async (req, res) => {
     }
 
     if (!bon.docxPath) {
-      return res.status(404).json({ message: 'Document not generated yet' });
+      return res.status(404).json({ message: "Le document n'a pas encore été généré (bon non signé)" });
     }
 
     res.json({
@@ -155,11 +160,11 @@ router.get('/:id/download', protect, async (req, res) => {
       path: bon.docxPath
     });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
-router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
+router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const bon = await BonDeReception.findById(req.params.id);
 
@@ -195,8 +200,7 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
       message: 'Bon de réception supprimé' 
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 

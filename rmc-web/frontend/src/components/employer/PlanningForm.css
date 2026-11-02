@@ -307,7 +307,7 @@
 .btn-submit {
   background: var(--brass-gradient);
   color: white;
-  box-shadow: 0 2px 8px rgba(120, 90, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 54, 100, 0.2);
 }
 .btn-submit:hover {
   opacity: 0.9;

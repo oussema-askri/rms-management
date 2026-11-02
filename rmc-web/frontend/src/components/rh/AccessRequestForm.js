@@ -3,6 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { rhAPI, planningAPI } from '../../services/api';
 import './AccessRequestForm.css';
 
+// Same rule as the server (utils/accessCrew.js): spacing and case do not make a
+// CIN or a plate different.
+const identityKey = (value) => String(value || '').replace(/\s+/g, '').toUpperCase();
+
+// Row indexes whose key already appears in an earlier row.
+const duplicateRows = (rows, field) => {
+  const seen = new Set();
+  const dupes = new Set();
+  rows.forEach((row, i) => {
+    const key = identityKey(row[field]);
+    if (!key) return;
+    if (seen.has(key)) dupes.add(i);
+    seen.add(key);
+  });
+  return dupes;
+};
+
 function AccessRequestForm({ onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     missionDate: '',
@@ -87,15 +104,26 @@ function AccessRequestForm({ onClose, onSuccess }) {
 
   const selectEmployee = (index, employeeId) => {
     const employee = employees.find(emp => emp._id === employeeId);
-    if (employee) {
-      const newWorkers = [...workers];
-      newWorkers[index] = {
-        name: employee.name,
-        cin: employee.cin
-      };
-      setWorkers(newWorkers);
-    }
+    const newWorkers = [...workers];
+    newWorkers[index] = employee
+      ? { name: employee.name, cin: employee.cin }
+      : { name: '', cin: '' };
+    setWorkers(newWorkers);
   };
+
+  // The same employee or vehicle could be added any number of times.
+  const duplicateWorkers = duplicateRows(workers, 'cin');
+  const duplicateVehicles = duplicateRows(vehicles, 'matricule');
+
+  // An employee already on another row is not offered again.
+  const employeeOptionsFor = (index) => {
+    const taken = new Set(
+      workers.filter((_, i) => i !== index).map(w => identityKey(w.cin)).filter(Boolean)
+    );
+    return employees.filter(emp => !taken.has(identityKey(emp.cin)));
+  };
+  const selectedEmployeeId = (worker) =>
+    employees.find(emp => identityKey(emp.cin) === identityKey(worker.cin))?._id || '';
 
   // --- Materiel autocomplete ---
   const handleMaterialClick = (mat) => {
@@ -116,6 +144,13 @@ function AccessRequestForm({ onClose, onSuccess }) {
     const validWorkers = workers.filter(w => w.name && w.cin);
     if (validWorkers.length === 0) {
       setError('Veuillez ajouter au moins un travailleur');
+      setLoading(false);
+      return;
+    }
+    if (duplicateWorkers.size > 0 || duplicateVehicles.size > 0) {
+      setError(duplicateWorkers.size > 0
+        ? 'Un travailleur figure deux fois dans la liste. Retirez le doublon.'
+        : 'Un véhicule figure deux fois dans la liste. Retirez le doublon.');
       setLoading(false);
       return;
     }
@@ -254,18 +289,19 @@ function AccessRequestForm({ onClose, onSuccess }) {
             <h3>👷 Personnel Assigné</h3>
 
             {workers.map((worker, index) => (
-              <div key={index} className="worker-row">
+              <div key={index} className={`worker-row${duplicateWorkers.has(index) ? ' is-duplicate' : ''}`}>
                 <div className="worker-number">{index + 1}</div>
 
                 <div className="worker-fields">
                   <div className="form-group">
                     <label>Sélectionner Employé</label>
                     <select
+                      value={selectedEmployeeId(worker)}
                       onChange={(e) => selectEmployee(index, e.target.value)}
                       className="employee-select"
                     >
                       <option value="">-- Choisir un employé --</option>
-                      {employees.map(emp => (
+                      {employeeOptionsFor(index).map(emp => (
                         <option key={emp._id} value={emp._id}>
                           {emp.name} - CIN: {emp.cin}
                         </option>
@@ -296,6 +332,9 @@ function AccessRequestForm({ onClose, onSuccess }) {
                       />
                     </div>
                   </div>
+                  {duplicateWorkers.has(index) && (
+                    <p className="duplicate-hint">Ce travailleur est déjà dans la liste.</p>
+                  )}
                 </div>
 
                 {workers.length > 1 && (
@@ -321,7 +360,7 @@ function AccessRequestForm({ onClose, onSuccess }) {
             <h3>🚗 Véhicule(s)</h3>
 
             {vehicles.map((vehicle, index) => (
-              <div key={index} className="vehicle-row">
+              <div key={index} className={`vehicle-row${duplicateVehicles.has(index) ? ' is-duplicate' : ''}`}>
                 <div className="vehicle-number">{index + 1}</div>
                 <div className="form-row vehicle-fields">
                   <div className="form-group">
@@ -341,6 +380,9 @@ function AccessRequestForm({ onClose, onSuccess }) {
                       onChange={(e) => handleVehicleChange(index, 'matricule', e.target.value)}
                       placeholder="Ex: 123 TU 4567"
                     />
+                    {duplicateVehicles.has(index) && (
+                      <p className="duplicate-hint">Ce véhicule est déjà dans la liste.</p>
+                    )}
                   </div>
                 </div>
                 {vehicles.length > 1 && (

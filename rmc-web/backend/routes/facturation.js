@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 // GET /api/facturation
 // Fetch all generated invoices
-router.get('/', protect, authorize('rh', 'admin', 'comptable'), async (req, res) => {
+router.get('/', protect, authorize('rh', 'admin', 'comptable'), async (req, res, next) => {
   try {
     const factures = await Facture.find().sort({ createdAt: -1 }).populate('bons', 'bonNumber clientName');
     res.json({ success: true, data: factures });
@@ -20,7 +20,7 @@ router.get('/', protect, authorize('rh', 'admin', 'comptable'), async (req, res)
 
 // POST /api/facturation
 // Generate and save a new invoice
-router.post('/', protect, authorize('rh', 'admin', 'comptable'), async (req, res) => {
+router.post('/', protect, authorize('rh', 'admin', 'comptable'), async (req, res, next) => {
   try {
     const { factureNumber, date, clientName, clientAddress, clientTel, items, bonIds } = req.body;
 
@@ -105,12 +105,21 @@ router.post('/', protect, authorize('rh', 'admin', 'comptable'), async (req, res
 
     await facture.save();
 
-    // Lock the Bons
+    // Lock the bons, but only those still free. Two invoices raised at the same
+    // moment both passed the "already billed" check above and then both locked
+    // the same bons, billing that work twice.
     if (bons.length > 0) {
-      await BonDeReception.updateMany(
-        { _id: { $in: bons } },
+      const lock = await BonDeReception.updateMany(
+        { _id: { $in: bons }, facture: null },
         { $set: { facture: facture._id } }
       );
+      if (lock.modifiedCount !== bons.length) {
+        await BonDeReception.updateMany({ facture: facture._id }, { $set: { facture: null } });
+        await facture.deleteOne();
+        return res.status(409).json({
+          message: "Un ou plusieurs bons viennent d'être facturés ailleurs. Actualisez et réessayez.",
+        });
+      }
     }
 
     res.status(201).json({ success: true, data: facture });
@@ -125,7 +134,7 @@ router.post('/', protect, authorize('rh', 'admin', 'comptable'), async (req, res
 
 // GET /api/facturation/:id/download
 // Regenerate and download the Word document for a saved invoice
-router.get('/:id/download', protect, authorize('rh', 'admin', 'comptable'), async (req, res) => {
+router.get('/:id/download', protect, authorize('rh', 'admin', 'comptable'), async (req, res, next) => {
   try {
     const facture = await Facture.findById(req.params.id).populate('bons', 'bonNumber');
     if (!facture) {
@@ -162,7 +171,7 @@ router.get('/:id/download', protect, authorize('rh', 'admin', 'comptable'), asyn
 
 // DELETE /api/facturation/:id
 // Delete an invoice (Admin only) and release attached BonDeReceptions
-router.delete('/:id', protect, authorize('admin'), async (req, res) => {
+router.delete('/:id', protect, authorize('admin'), async (req, res, next) => {
   try {
     const factureId = req.params.id;
     const facture = await Facture.findById(factureId);

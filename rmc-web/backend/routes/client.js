@@ -5,7 +5,7 @@ const path = require('path');
 const Client = require('../models/Client');
 const { protect, authorize } = require('../middleware/auth');
 const { uploadPath, toStoredPath } = require('../config/uploadDirs');
-const { removeStoredFiles, discardUploads, blockedBy } = require('../utils/cleanup');
+const { removeStoredFiles, discardUploads, discardUploadsOnFailure, blockedBy } = require('../utils/cleanup');
 const { withConflictRetry, withDuplicateRetry } = require('../utils/retry');
 const Planning = require('../models/Planning');
 const mongoose = require('mongoose');
@@ -51,23 +51,26 @@ const nextSuffix = (existing, extract) => {
 // ============================================
 // GET ALL CLIENTS - ALL ROLES
 // ============================================
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, async (req, res, next) => {
   try {
-    const clients = await Client.find()
+    // Archived clients are left out unless asked for with ?archived=true.
+    const filter = req.query.archived === 'true'
+      ? { archived: true }
+      : { archived: { $ne: true } };
+    const clients = await Client.find(filter)
       .populate('createdBy', 'name email')
       .sort({ clientNumber: 1 });
 
     res.json({ success: true, count: clients.length, data: clients });
   } catch (error) {
-    console.error('Error fetching clients:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // ============================================
 // GET SINGLE CLIENT - ALL ROLES
 // ============================================
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, async (req, res, next) => {
   try {
     const client = await Client.findById(req.params.id)
       .populate('createdBy', 'name email');
@@ -78,8 +81,7 @@ router.get('/:id', protect, async (req, res) => {
 
     res.json({ success: true, data: client });
   } catch (error) {
-    console.error('Error fetching client:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
@@ -89,7 +91,7 @@ router.get('/:id', protect, async (req, res) => {
 // Creating clients and their units was open to every signed-in role,
 // including plain employees, while both interfaces already hid the action from
 // them. The guard now matches what the apps present.
-router.post('/', protect, authorize('rh', 'admin', 'responsable', 'comptable'), upload.array('pieceJointe', 5), async (req, res, next) => {
+router.post('/', protect, authorize('rh', 'admin', 'responsable', 'comptable'), discardUploadsOnFailure, upload.array('pieceJointe', 5), async (req, res, next) => {
   try {
     const {
       name,
@@ -113,7 +115,8 @@ router.post('/', protect, authorize('rh', 'admin', 'responsable', 'comptable'), 
         address: address || '',
         telephone: telephone || '',
         departement: departement || '',
-        tvaPercentage: tvaPercentage || 19,
+        // `|| 19` turned an exempt client's 0% into 19%.
+        tvaPercentage: tvaPercentage === undefined || tvaPercentage === '' ? 19 : Number(tvaPercentage),
         modePaiement: modePaiement || 'Virement',
         devise: devise || 'TND',
         createdBy: req.user.id
@@ -146,7 +149,7 @@ router.post('/', protect, authorize('rh', 'admin', 'responsable', 'comptable'), 
 // ============================================
 // UPDATE CLIENT - ONLY RH AND ADMIN
 // ============================================
-router.put('/:id', protect, authorize('rh', 'admin'), upload.array('pieceJointe', 5), async (req, res, next) => {
+router.put('/:id', protect, authorize('rh', 'admin'), discardUploadsOnFailure, upload.array('pieceJointe', 5), async (req, res, next) => {
   try {
     const {
       name,
@@ -172,7 +175,7 @@ router.put('/:id', protect, authorize('rh', 'admin'), upload.array('pieceJointe'
     if (address !== undefined) client.address = address;
     if (telephone !== undefined) client.telephone = telephone;
     if (departement !== undefined) client.departement = departement;
-    if (tvaPercentage !== undefined) client.tvaPercentage = tvaPercentage;
+    if (tvaPercentage !== undefined && tvaPercentage !== '') client.tvaPercentage = Number(tvaPercentage);
     if (modePaiement !== undefined) client.modePaiement = modePaiement;
     if (devise !== undefined) client.devise = devise;
     client.updatedAt = Date.now();
@@ -200,7 +203,7 @@ router.put('/:id', protect, authorize('rh', 'admin'), upload.array('pieceJointe'
 // ============================================
 // DELETE CLIENT - ONLY RH AND ADMIN
 // ============================================
-router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
+router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const client = await Client.findById(req.params.id);
 
@@ -216,10 +219,18 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
       BonDeReception.countDocuments({ client: client._id }),
     ]);
 
+    // A client with history is archived instead: deleting it would leave its
+    // tasks, bons and invoices pointing at nothing. Refusing outright left
+    // administrators with no way to get an old client off their lists.
     const blocking = blockedBy({ 'tâche(s)': tasks, 'bon(s) de réception': bons });
     if (blocking) {
-      return res.status(409).json({
-        message: `Impossible de supprimer ce client: ${blocking} y sont rattaché(s).`
+      client.archived = true;
+      client.archivedAt = Date.now();
+      await client.save();
+      return res.json({
+        success: true,
+        archived: true,
+        message: `Client archivé: ${blocking} y sont rattaché(s), son historique est conservé.`
       });
     }
 
@@ -229,15 +240,35 @@ router.delete('/:id', protect, authorize('rh', 'admin'), async (req, res) => {
 
     res.json({ success: true, message: 'Client supprimé' });
   } catch (error) {
-    console.error('Error deleting client:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
+  }
+});
+
+// ============================================
+// RESTORE AN ARCHIVED CLIENT - ONLY RH AND ADMIN
+// ============================================
+router.patch('/:id/restore', protect, authorize('rh', 'admin'), async (req, res, next) => {
+  try {
+    const client = await Client.findByIdAndUpdate(
+      req.params.id,
+      { archived: false, $unset: { archivedAt: 1 } },
+      { new: true }
+    ).populate('createdBy', 'name email');
+
+    if (!client) {
+      return res.status(404).json({ message: 'Client introuvable' });
+    }
+
+    res.json({ success: true, data: client, message: 'Client restauré' });
+  } catch (error) {
+    next(error);
   }
 });
 
 // ============================================
 // ADD UNITE TO CLIENT - ALL ROLES
 // ============================================
-router.post('/:id/unites', protect, authorize('rh', 'admin', 'responsable', 'comptable'), async (req, res) => {
+router.post('/:id/unites', protect, authorize('rh', 'admin', 'responsable', 'comptable'), async (req, res, next) => {
   try {
     const { uniteName, responsable, email, phone } = req.body;
 
@@ -297,18 +328,14 @@ router.post('/:id/unites', protect, authorize('rh', 'admin', 'responsable', 'com
 
     res.status(201).json({ success: true, data: populatedClient });
   } catch (error) {
-    console.error('Error adding unite:', error);
-    res.status(500).json({
-      message: 'Erreur serveur',
-      error: error.message
-    });
+    next(error);
   }
 });
 
 // ============================================
 // DELETE UNITE FROM CLIENT - ONLY RH AND ADMIN
 // ============================================
-router.delete('/:id/unites/:uniteId', protect, authorize('rh', 'admin'), async (req, res) => {
+router.delete('/:id/unites/:uniteId', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const client = await Client.findById(req.params.id);
 
@@ -346,15 +373,14 @@ router.delete('/:id/unites/:uniteId', protect, authorize('rh', 'admin'), async (
 
     res.json({ success: true, data: populatedClient });
   } catch (error) {
-    console.error('Error deleting unite:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // ============================================
 // ADD SOUS-TITRE TO UNITE
 // ============================================
-router.post('/:clientId/unites/:uniteId/sous-titres', protect, authorize('rh', 'admin', 'responsable', 'comptable'), async (req, res) => {
+router.post('/:clientId/unites/:uniteId/sous-titres', protect, authorize('rh', 'admin', 'responsable', 'comptable'), async (req, res, next) => {
   try {
     const { name } = req.body;
     
@@ -414,15 +440,14 @@ router.post('/:clientId/unites/:uniteId/sous-titres', protect, authorize('rh', '
 
     res.json({ success: true, data: populatedClient });
   } catch (error) {
-    console.error('Error adding sous-titre:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // ============================================
 // DELETE SOUS-TITRE FROM UNITE - ONLY RH AND ADMIN
 // ============================================
-router.delete('/:clientId/unites/:uniteId/sous-titres/:sousTitreId', protect, authorize('rh', 'admin'), async (req, res) => {
+router.delete('/:clientId/unites/:uniteId/sous-titres/:sousTitreId', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const client = await Client.findById(req.params.clientId);
 
@@ -463,8 +488,7 @@ router.delete('/:clientId/unites/:uniteId/sous-titres/:sousTitreId', protect, au
 
     res.json({ success: true, data: populatedClient });
   } catch (error) {
-    console.error('Error deleting sous-titre:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 

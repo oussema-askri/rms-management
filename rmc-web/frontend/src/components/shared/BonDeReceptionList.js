@@ -6,6 +6,7 @@ import BonDeReceptionView from './BonDeReceptionView';
 import './BonDeReceptionList.css';
 import { openFile } from '../../services/files';
 import useAutoRefresh from '../../hooks/useAutoRefresh';
+import StatusBadge from './StatusBadge';
 
 function BonDeReceptionList() {
   const [bons, setBons] = useState([]);
@@ -67,16 +68,7 @@ function BonDeReceptionList() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    return (
-      <span
-        className="status-badge"
-        style={{ backgroundColor: status === 'active' ? '#C26B1E' : '#27976A' }}
-      >
-        {status === 'active' ? 'Actif' : 'Signé'}
-      </span>
-    );
-  };
+  const getStatusBadge = (status) => <StatusBadge status={status} />;
 
   const filteredBons = bons.filter(bon => {
     if (!searchTerm) return true;
@@ -113,7 +105,7 @@ function BonDeReceptionList() {
         </div>
         <div className="stat-item stat-active">
           <span className="stat-value">{activeCount}</span>
-          <span className="stat-label">Actifs</span>
+          <span className="stat-label">Ouverts</span>
         </div>
         <div className="stat-item stat-signed">
           <span className="stat-value">{signedCount}</span>
@@ -201,7 +193,7 @@ function BonDeReceptionList() {
                         className="btn-action btn-view"
                         title="Voir détails"
                       >
-                        ◉
+                        <span className="material-symbols-outlined">visibility</span>
                       </button>
 
                       {bon.status === 'active' && (isRH || isAdmin) && (
@@ -211,7 +203,7 @@ function BonDeReceptionList() {
                           disabled={!bon.taches?.length}
                           title="Signer"
                         >
-                          ✓
+                          <span className="material-symbols-outlined">draw</span>
                         </button>
                       )}
 
@@ -221,7 +213,7 @@ function BonDeReceptionList() {
                           className="btn-action btn-download"
                           title="Télécharger"
                         >
-                          ↓
+                          <span className="material-symbols-outlined">download</span>
                         </button>
                       )}
 
@@ -231,7 +223,7 @@ function BonDeReceptionList() {
                           className="btn-action btn-delete"
                           title="Supprimer"
                         >
-                          ✕
+                          <span className="material-symbols-outlined">delete</span>
                         </button>
                       )}
                     </div>

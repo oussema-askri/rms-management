@@ -324,7 +324,7 @@ function EmployeeList() {
                           className="btn-action btn-doc"
                           title="Voir CIN"
                         >
-                          ID
+                          <span className="material-symbols-outlined">badge</span>
                         </button>
                       )}
                     </div>
@@ -337,7 +337,7 @@ function EmployeeList() {
                           className="btn-action btn-edit"
                           title="Modifier"
                         >
-                          ✎
+                          <span className="material-symbols-outlined">edit</span>
                         </button>
                         {isAdmin && (
                           <button
@@ -345,7 +345,7 @@ function EmployeeList() {
                             className="btn-action btn-reset"
                             title="Réinitialiser mot de passe"
                           >
-                            🔑
+                            <span className="material-symbols-outlined">lock_reset</span>
                           </button>
                         )}
                         {isAdmin && (
@@ -354,7 +354,7 @@ function EmployeeList() {
                             className="btn-action btn-delete"
                             title="Supprimer"
                           >
-                            ✕
+                            <span className="material-symbols-outlined">delete</span>
                           </button>
                         )}
                       </div>

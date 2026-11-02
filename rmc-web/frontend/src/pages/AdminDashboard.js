@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { adminAPI } from '../services/api';
 import Sidebar from '../components/layout/Sidebar';
 import PlanningList from '../components/employer/PlanningList';
 import PlanningCalendar from '../components/employer/PlanningCalendar';
@@ -15,19 +14,16 @@ import BonDeReceptionList from '../components/shared/BonDeReceptionList';
 import ProfilePage from '../components/shared/ProfilePage';
 import MonthlySummary from '../components/admin/MonthlySummary';
 import PointageList from '../components/shared/PointageList';
+import DashboardOverview from '../components/shared/DashboardOverview';
 import './Dashboard.css';
 import './DashboardWithSidebar.css';
 
 function AdminDashboard() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    fetchStats();
-
     // Read from URL hash
     const hash = window.location.hash.replace('#', '');
     if (hash) {
@@ -43,17 +39,6 @@ function AdminDashboard() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
-
-  const fetchStats = async () => {
-    try {
-      const response = await adminAPI.getStats();
-      setStats(response.data.data);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -112,110 +97,7 @@ function AdminDashboard() {
 
         {/* Main Content Area */}
         <div className="content-body">
-          {activeTab === 'overview' && (
-            <div className="overview-content">
-              {/* Statistics Grid */}
-              {loading ? (
-                <div className="loading-state">
-                  <div className="spinner"></div>
-                  <p>Chargement des statistiques...</p>
-                </div>
-              ) : (
-                <div className="stats-grid-modern">
-                  <div className="stat-card-modern stat-primary">
-                    <div className="stat-info">
-                      <div className="stat-label">Total Utilisateurs</div>
-                      <div className="stat-value">{stats?.totalUsers || 0}</div>
-                    </div>
-                  </div>
-                  <div className="stat-card-modern stat-secondary">
-                    <div className="stat-info">
-                      <div className="stat-label">Tâches Planning</div>
-                      <div className="stat-value">{stats?.totalPlanning || 0}</div>
-                    </div>
-                  </div>
-                  <div className="stat-card-modern stat-success">
-                    <div className="stat-info">
-                      <div className="stat-label">Dépenses Totales</div>
-                      <div className="stat-value">{stats?.totalExpenses || 0}</div>
-                    </div>
-                  </div>
-                  <div className="stat-card-modern stat-warning">
-                    <div className="stat-info">
-                      <div className="stat-label">En Attente</div>
-                      <div className="stat-value">{stats?.pendingExpenses || 0}</div>
-                    </div>
-                  </div>
-                  <div className="stat-card-modern stat-success">
-                    <div className="stat-info">
-                      <div className="stat-label">Approuvées</div>
-                      <div className="stat-value">{stats?.approvedExpenses || 0}</div>
-                    </div>
-                  </div>
-                  <div className="stat-card-modern stat-primary">
-                    <div className="stat-info">
-                      <div className="stat-label">Montant Total</div>
-                      <div className="stat-value">{stats?.totalExpenseAmount?.toFixed(2) || 0} TND</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Actions */}
-              <div className="quick-actions-section">
-                <h2 className="section-title">Accès Rapide</h2>
-                <div className="quick-actions-grid">
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'clients'}>
-                    <div className="action-content">
-                      <h3>Clients</h3>
-                      <p>Gérer les clients et unités</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'planning'}>
-                    <div className="action-content">
-                      <h3>Planning</h3>
-                      <p>Voir toutes les tâches</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'bon-reception'}>
-                    <div className="action-content">
-                      <h3>Bons de Réception</h3>
-                      <p>Signer les bons</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'expenses'}>
-                    <div className="action-content">
-                      <h3>Dépenses</h3>
-                      <p>Approuver les dépenses</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'employees'}>
-                    <div className="action-content">
-                      <h3>Employés</h3>
-                      <p>Gérer les employés</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'access'}>
-                    <div className="action-content">
-                      <h3>Demandes d'Accès</h3>
-                      <p>Gérer les accès</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'overview' && <DashboardOverview role="admin" />}
 
           {activeTab === 'clients' && <ClientList />}
           {activeTab === 'taches' && <PlanningList />}

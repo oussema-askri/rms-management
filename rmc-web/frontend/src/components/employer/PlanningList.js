@@ -5,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import PlanningForm from './PlanningForm';
 import './PlanningList.css';
 import useAutoRefresh from '../../hooks/useAutoRefresh';
+import StatusBadge from '../shared/StatusBadge';
 
 function PlanningList() {
   const [plannings, setPlannings] = useState([]);
@@ -47,20 +48,7 @@ function PlanningList() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusMap = {
-      pending: { label: 'En attente', className: 'status-pending' },
-      in_progress: { label: 'En cours', className: 'status-progress' },
-      completed: { label: 'Terminé', className: 'status-completed' },
-      cancelled: { label: 'Annulé', className: 'status-cancelled' }
-    };
-    const s = statusMap[status] || { label: status, className: '' };
-    return (
-      <span className={`status-pill ${s.className}`}>
-        {s.label}
-      </span>
-    );
-  };
+  const getStatusBadge = (status) => <StatusBadge status={status} />;
 
   const formatDateTime = (dateStr) => {
     const d = new Date(dateStr);

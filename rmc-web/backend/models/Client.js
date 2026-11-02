@@ -89,6 +89,13 @@ const ClientSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  // Set when a client with history is deleted: it leaves the lists and the
+  // task form, while its tasks, bons and invoices still resolve its name.
+  archived: {
+    type: Boolean,
+    default: false
+  },
+  archivedAt: Date,
   createdAt: {
     type: Date,
     default: Date.now

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { adminAPI } from '../../services/api';
 import { exportMonthlySummary } from '../../utils/excelExport';
 import './MonthlySummary.css';
+import StatusBadge from '../shared/StatusBadge';
+import { categoryLabel } from '../../constants/expenses';
 
 function MonthlySummary() {
   const now = new Date();
@@ -43,7 +45,6 @@ function MonthlySummary() {
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
 
-  const statusLabels = { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté', completed: 'Terminé', in_progress: 'En cours', cancelled: 'Annulé', signed: 'Signé', active: 'Actif' };
   const typeLabels = { salarie: 'Salarié', taux_journalier: 'Journalier', prestataire: 'Prestataire' };
 
   const renderSectionHeader = (key, title, count) => (
@@ -146,7 +147,7 @@ function MonthlySummary() {
                     <tbody>
                       {data.financial.expensesByCategory.map((e, i) => (
                         <tr key={i}>
-                          <td>{e.category}</td>
+                          <td>{categoryLabel(e.category)}</td>
                           <td><span className="amount-val">{fmtAmount(e.total)}</span></td>
                         </tr>
                       ))}
@@ -228,8 +229,8 @@ function MonthlySummary() {
                           <td>{fmtDate(e.createdAt)}</td>
                           <td>{e.description}</td>
                           <td><span className="amount-val">{fmtAmount(e.amount)} TND</span></td>
-                          <td>{e.category || '—'}</td>
-                          <td><span className={`report-status ${e.status}`}>{statusLabels[e.status]}</span></td>
+                          <td>{categoryLabel(e.category) || '—'}</td>
+                          <td><StatusBadge status={e.status} /></td>
                           <td>{e.createdBy}</td>
                         </tr>
                       ))}
@@ -264,7 +265,7 @@ function MonthlySummary() {
                           <td>{p.clientName}</td>
                           <td>{p.unite}</td>
                           <td>{p.description}</td>
-                          <td><span className={`report-status ${p.status}`}>{statusLabels[p.status]}</span></td>
+                          <td><StatusBadge status={p.status} /></td>
                           <td>{p.quantite} {p.uniteQuantite}</td>
                           <td>{(p.assignedWorkers || []).join(', ') || '—'}</td>
                         </tr>
@@ -297,7 +298,7 @@ function MonthlySummary() {
                           <td>{b.bonNumber}</td>
                           <td>{b.clientName}</td>
                           <td>{b.unite}</td>
-                          <td><span className={`report-status ${b.status}`}>{statusLabels[b.status]}</span></td>
+                          <td><StatusBadge status={b.status} /></td>
                           <td>{fmtDate(b.createdAt)}</td>
                           <td>{fmtDate(b.signedAt)}</td>
                         </tr>
@@ -400,7 +401,7 @@ function MonthlySummary() {
                           <td>{fmtDate(c.startDate)}</td>
                           <td>{fmtDate(c.endDate)}</td>
                           <td>{c.reason}</td>
-                          <td><span className={`report-status ${c.status}`}>{statusLabels[c.status]}</span></td>
+                          <td><StatusBadge status={c.status} /></td>
                         </tr>
                       ))}
                     </tbody>

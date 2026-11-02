@@ -5,9 +5,10 @@ const AccessRequest = require('../models/AccessRequest');
 const CongeRequest = require('../models/CongeRequest');
 const { protect, authorize } = require('../middleware/auth');
 const generateAccessDocument = require('../utils/generateAccessDocument');
+const { normaliseWorkers, normaliseVehicles } = require('../utils/accessCrew');
 const { yearStartUTC, yearEndUTC, inclusiveDayCount } = require('../utils/dateRange');
 const { canAssignRole, canModifyUser, validatePassword } = require('../utils/roles');
-const { removeStoredFile, removeStoredFiles, blockedBy } = require('../utils/cleanup');
+const { removeStoredFile, removeStoredFiles, blockedBy, discardUploadsOnFailure } = require('../utils/cleanup');
 const Planning = require('../models/Planning');
 const Expense = require('../models/Expense');
 const DailyPointage = require('../models/DailyPointage');
@@ -98,7 +99,7 @@ const uploadConge = multer({
 
 // Upload directories are created once at startup by config/uploadDirs.js.
 // Get all employees
-router.get('/employees', protect, authorize('rh', 'admin', 'employer', 'responsable', 'comptable'), async (req, res) => {
+router.get('/employees', protect, authorize('rh', 'admin', 'employer', 'responsable', 'comptable'), async (req, res, next) => {
   try {
     // Every role could read every colleague's salary, daily rate, CNSS number
     // and bonus history. Withhold those from roles that have no need for them.
@@ -107,14 +108,14 @@ router.get('/employees', protect, authorize('rh', 'admin', 'employer', 'responsa
       .sort({ createdAt: -1 });
     res.json({ success: true, count: employees.length, data: employees });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
-router.post('/employees', protect, authorize('rh', 'admin', 'responsable'), upload.fields([
+router.post('/employees', protect, authorize('rh', 'admin', 'responsable'), discardUploadsOnFailure, upload.fields([
   { name: 'photo', maxCount: 1 },
   { name: 'cinImage', maxCount: 1 }
-]), async (req, res) => {
+]), async (req, res, next) => {
   try {
     const {
       name, email, password, role, cin, phone, address,
@@ -191,13 +192,12 @@ router.post('/employees', protect, authorize('rh', 'admin', 'responsable'), uplo
       data: savedEmployee
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get single employee
-router.get('/employees/:id', protect, authorize('rh', 'admin', 'employer', 'responsable', 'comptable'), async (req, res) => {
+router.get('/employees/:id', protect, authorize('rh', 'admin', 'employer', 'responsable', 'comptable'), async (req, res, next) => {
   try {
     // Same payroll rule as the list, except that anyone may see their own.
     const isSelf = req.params.id === String(req.user._id);
@@ -210,15 +210,15 @@ router.get('/employees/:id', protect, authorize('rh', 'admin', 'employer', 'resp
 
     res.json({ success: true, data: employee });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Update employee
-router.put('/employees/:id', protect, authorize('rh', 'admin', 'responsable'), upload.fields([
+router.put('/employees/:id', protect, authorize('rh', 'admin', 'responsable'), discardUploadsOnFailure, upload.fields([
   { name: 'photo', maxCount: 1 },
   { name: 'cinImage', maxCount: 1 }
-]), async (req, res) => {
+]), async (req, res, next) => {
   try {
     const employee = await User.findById(req.params.id);
     if (!employee) {
@@ -256,26 +256,30 @@ router.put('/employees/:id', protect, authorize('rh', 'admin', 'responsable'), u
       }
     });
 
+    // A replaced photo or CIN scan used to stay on disk with nothing pointing at it.
+    const replaced = [];
     if (req.files) {
       if (req.files.photo) {
+        replaced.push(employee.photo);
         employee.photo = toStoredPath(req.files.photo[0].path);
       }
       if (req.files.cinImage) {
+        replaced.push(employee.cinImage);
         employee.cinImage = toStoredPath(req.files.cinImage[0].path);
       }
     }
 
     await employee.save();
+    removeStoredFiles(replaced);
     const updated = await User.findById(employee._id).select('-password');
     res.json({ success: true, data: updated });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Set employee availability (vacation)
-router.put('/employees/:id/availability', protect, authorize('rh', 'admin', 'responsable'), async (req, res) => {
+router.put('/employees/:id/availability', protect, authorize('rh', 'admin', 'responsable'), async (req, res, next) => {
   try {
     const { isAvailable, vacationDates } = req.body;
 
@@ -306,12 +310,12 @@ router.put('/employees/:id/availability', protect, authorize('rh', 'admin', 'res
 
     res.json({ success: true, data: employee });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Add prime (bonus) to employee
-router.post('/employees/:id/prime', protect, authorize('rh', 'admin', 'responsable'), async (req, res) => {
+router.post('/employees/:id/prime', protect, authorize('rh', 'admin', 'responsable'), async (req, res, next) => {
   try {
     const { amount, reason } = req.body;
 
@@ -340,12 +344,12 @@ router.post('/employees/:id/prime', protect, authorize('rh', 'admin', 'responsab
 
     res.json({ success: true, data: employee });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Delete employee
-router.delete('/employees/:id', protect, authorize('admin'), async (req, res) => {
+router.delete('/employees/:id', protect, authorize('admin'), async (req, res, next) => {
   try {
     // Deleting your own account would leave you holding a valid token for a
     // user that no longer exists, and can remove the last administrator.
@@ -401,14 +405,14 @@ router.delete('/employees/:id', protect, authorize('admin'), async (req, res) =>
 
     res.json({ success: true, message: 'Employé supprimé' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // ========== ACCESS REQUESTS ==========
 
 // Get approved access requests for the logged-in employee (matched by CIN)
-router.get('/my-access-requests', protect, async (req, res) => {
+router.get('/my-access-requests', protect, async (req, res, next) => {
   try {
     const userCin = req.user.cin;
     if (!userCin) {
@@ -424,12 +428,12 @@ router.get('/my-access-requests', protect, async (req, res) => {
 
     res.json({ success: true, count: requests.length, data: requests });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get all access requests
-router.get('/access-requests', protect, authorize('rh', 'admin', 'responsable'), async (req, res) => {
+router.get('/access-requests', protect, authorize('rh', 'admin', 'responsable'), async (req, res, next) => {
   try {
     const requests = await AccessRequest.find()
       .populate('createdBy', 'name email')
@@ -437,12 +441,12 @@ router.get('/access-requests', protect, authorize('rh', 'admin', 'responsable'),
 
     res.json({ success: true, count: requests.length, data: requests });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get single access request
-router.get('/access-requests/:id', protect, authorize('rh', 'admin', 'responsable'), async (req, res) => {
+router.get('/access-requests/:id', protect, authorize('rh', 'admin', 'responsable'), async (req, res, next) => {
   try {
     const accessRequest = await AccessRequest.findById(req.params.id)
       .populate('createdBy', 'name email');
@@ -453,21 +457,27 @@ router.get('/access-requests/:id', protect, authorize('rh', 'admin', 'responsabl
 
     res.json({ success: true, data: accessRequest });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Create access request
-router.post('/access-requests', protect, authorize('rh', 'admin', 'responsable'), async (req, res) => {
+router.post('/access-requests', protect, authorize('rh', 'admin', 'responsable'), async (req, res, next) => {
   try {
-    const { missionDate, location, workers, vehicle, vehicles, duration, purpose, materiels, bateau } = req.body;
+    const { missionDate, location, workers, vehicles, duration, purpose, materiels, bateau } = req.body;
+
+    // Refuses the same person or the same plate listed twice.
+    const crew = normaliseWorkers(workers);
+    const fleet = normaliseVehicles(vehicles);
 
     const accessRequest = new AccessRequest({
       missionDate,
       location,
-      workers,
-      vehicle,
-      vehicles: vehicles || [],
+      workers: crew,
+      // The legacy single-vehicle field mirrors the first entry, which is what
+      // the forms used to send in it.
+      vehicle: fleet[0] || { type: '', matricule: '' },
+      vehicles: fleet,
       duration,
       purpose,
       bateau,
@@ -492,13 +502,12 @@ router.post('/access-requests', protect, authorize('rh', 'admin', 'responsable')
 
     res.status(201).json({ success: true, data: populatedRequest });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Update access request status (approve / reject)
-router.patch('/access-requests/:id/status', protect, authorize('rh', 'admin'), async (req, res) => {
+router.patch('/access-requests/:id/status', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const { status } = req.body;
     if (!['approved', 'rejected', 'pending'].includes(status)) {
@@ -517,17 +526,16 @@ router.patch('/access-requests/:id/status', protect, authorize('rh', 'admin'), a
 
     res.json({ success: true, data: accessRequest });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Update access request
 const ACCESS_REQUEST_UPDATABLE = [
-  'missionDate', 'location', 'workers', 'vehicle', 'vehicles',
-  'duration', 'purpose', 'materiels', 'bateau'
+  'missionDate', 'location', 'duration', 'purpose', 'materiels', 'bateau'
 ];
 
-router.put('/access-requests/:id', protect, authorize('rh', 'admin', 'responsable'), async (req, res) => {
+router.put('/access-requests/:id', protect, authorize('rh', 'admin', 'responsable'), async (req, res, next) => {
   try {
     const accessRequest = await AccessRequest.findById(req.params.id);
 
@@ -541,13 +549,31 @@ router.put('/access-requests/:id', protect, authorize('rh', 'admin', 'responsabl
       if (req.body[field] !== undefined) accessRequest[field] = req.body[field];
     });
 
+    // A responsable changing a permit RH has already decided on sends it back
+    // for review; otherwise people could be added to an approved permit.
+    if (req.user.role === 'responsable' && accessRequest.status !== 'pending') {
+      accessRequest.status = 'pending';
+    }
+
+    // Same duplicate rules as on creation.
+    if (req.body.workers !== undefined) {
+      accessRequest.workers = normaliseWorkers(req.body.workers);
+    }
+    if (req.body.vehicles !== undefined) {
+      const fleet = normaliseVehicles(req.body.vehicles);
+      accessRequest.vehicles = fleet;
+      accessRequest.vehicle = fleet[0] || { type: '', matricule: '' };
+    }
+
     await accessRequest.save();
 
     // The permit document is built from these fields, so it has to be rebuilt
     // when they change. Previously the edit left the old .docx in place.
     try {
+      const previousDoc = accessRequest.docxPath;
       accessRequest.docxPath = await generateAccessDocument(accessRequest);
       await accessRequest.save();
+      if (previousDoc && previousDoc !== accessRequest.docxPath) removeStoredFile(previousDoc);
     } catch (docError) {
       console.error('Error regenerating access document:', docError);
       // Keep the update even if regeneration fails.
@@ -558,13 +584,12 @@ router.put('/access-requests/:id', protect, authorize('rh', 'admin', 'responsabl
 
     res.json({ success: true, data: populated });
   } catch (error) {
-    console.error('Error updating access request:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Delete access request
-router.delete('/access-requests/:id', protect, authorize('rh', 'admin', 'responsable'), async (req, res) => {
+router.delete('/access-requests/:id', protect, authorize('rh', 'admin', 'responsable'), async (req, res, next) => {
   try {
     const accessRequest = await AccessRequest.findByIdAndDelete(req.params.id);
 
@@ -577,7 +602,7 @@ router.delete('/access-requests/:id', protect, authorize('rh', 'admin', 'respons
 
     res.json({ success: true, message: "Demande d'accès supprimée" });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
@@ -602,7 +627,7 @@ const calcSolde = async (employeeId, year = new Date().getUTCFullYear()) => {
 };
 
 // Employee creates a congé request
-router.post('/conge', protect, uploadConge.single('pieceJointe'), async (req, res) => {
+router.post('/conge', protect, discardUploadsOnFailure, uploadConge.single('pieceJointe'), async (req, res, next) => {
   try {
     const { startDate, endDate, reason } = req.body;
     if (!startDate || !endDate || !reason) {
@@ -618,6 +643,23 @@ router.post('/conge', protect, uploadConge.single('pieceJointe'), async (req, re
     // count, which passes the solde check and stores a nonsensical request.
     if (end < start) {
       return res.status(400).json({ message: 'La date de fin doit être après la date de début' });
+    }
+
+    // The same days could be requested again and again; each copy then went
+    // to RH as a separate request, and approving two of them counted the days
+    // twice against the balance.
+    const overlapping = await CongeRequest.findOne({
+      employee: req.user.id,
+      status: { $in: ['pending', 'approved'] },
+      startDate: { $lte: end },
+      endDate: { $gte: start },
+    }).select('startDate endDate status');
+    if (overlapping) {
+      const fmt = (d) => new Date(d).toLocaleDateString('fr-FR', { timeZone: 'UTC' });
+      const state = overlapping.status === 'approved' ? 'approuvée' : 'en attente';
+      return res.status(409).json({
+        message: `Vous avez déjà une demande ${state} du ${fmt(overlapping.startDate)} au ${fmt(overlapping.endDate)} sur ces dates.`
+      });
     }
 
     const solde = await calcSolde(req.user.id);
@@ -637,36 +679,35 @@ router.post('/conge', protect, uploadConge.single('pieceJointe'), async (req, re
     await conge.save();
     res.status(201).json({ success: true, data: conge });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Employee gets their own congé requests + solde
-router.get('/my-conge', protect, async (req, res) => {
+router.get('/my-conge', protect, async (req, res, next) => {
   try {
     const conges = await CongeRequest.find({ employee: req.user.id }).sort({ createdAt: -1 });
     const solde = await calcSolde(req.user.id);
     res.json({ success: true, data: conges, solde, totalDays: ANNUAL_CONGE_DAYS });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // RH/Admin/Responsable get all congé requests
-router.get('/conge', protect, authorize('rh', 'admin', 'responsable'), async (req, res) => {
+router.get('/conge', protect, authorize('rh', 'admin', 'responsable'), async (req, res, next) => {
   try {
     const conges = await CongeRequest.find()
       .populate('employee', 'name email cin')
       .sort({ createdAt: -1 });
     res.json({ success: true, data: conges });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // RH/Admin approve or reject
-router.patch('/conge/:id/status', protect, authorize('rh', 'admin'), async (req, res) => {
+router.patch('/conge/:id/status', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const { status, rhComment } = req.body;
     if (!['approved', 'rejected', 'pending'].includes(status)) {
@@ -696,12 +737,12 @@ router.patch('/conge/:id/status', protect, authorize('rh', 'admin'), async (req,
     await conge.populate('employee', 'name email cin');
     res.json({ success: true, data: conge });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Delete congé request (owner or RH/Admin)
-router.delete('/conge/:id', protect, async (req, res) => {
+router.delete('/conge/:id', protect, async (req, res, next) => {
   try {
     const conge = await CongeRequest.findById(req.params.id);
     if (!conge) return res.status(404).json({ message: 'Demande introuvable' });
@@ -724,22 +765,22 @@ router.delete('/conge/:id', protect, async (req, res) => {
     removeStoredFile(conge.pieceJointe);
     res.json({ success: true, message: 'Demande supprimée' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get solde for a specific employee (RH/Admin)
-router.get('/employees/:id/solde', protect, authorize('rh', 'admin'), async (req, res) => {
+router.get('/employees/:id/solde', protect, authorize('rh', 'admin'), async (req, res, next) => {
   try {
     const solde = await calcSolde(req.params.id);
     res.json({ success: true, solde, totalDays: ANNUAL_CONGE_DAYS });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // Get soldes for all employees (RH/Admin/Comptable)
-router.get('/conge/soldes', protect, authorize('rh', 'admin', 'comptable'), async (req, res) => {
+router.get('/conge/soldes', protect, authorize('rh', 'admin', 'comptable'), async (req, res, next) => {
   try {
     const year = new Date().getUTCFullYear();
     const approved = await CongeRequest.find({
@@ -762,7 +803,7 @@ router.get('/conge/soldes', protect, authorize('rh', 'admin', 'comptable'), asyn
 
     res.json({ success: true, soldes, totalDays: ANNUAL_CONGE_DAYS });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 

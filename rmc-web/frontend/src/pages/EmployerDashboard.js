@@ -9,6 +9,7 @@ import ClientList from '../components/shared/ClientList';
 import MyAccessRequestList from '../components/employer/MyAccessRequestList';
 import MyCongeList from '../components/employer/MyCongeList';
 import ProfilePage from '../components/shared/ProfilePage';
+import DashboardOverview from '../components/shared/DashboardOverview';
 import './Dashboard.css';
 import './DashboardWithSidebar.css';
 
@@ -81,59 +82,7 @@ function EmployerDashboard() {
 
         {/* Main Content Area */}
         <div className="content-body">
-          {activeTab === 'overview' && (
-            <div className="overview-content">
-              {/* The leave balance banner was removed from the dashboard. The
-                  balance is still shown on the Mes Congés page itself, which is
-                  where a request is actually made. */}
-              <div className="quick-actions-section">
-                <h2 className="section-title">Accès Rapide</h2>
-                <div className="quick-actions-grid">
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'clients'}>
-                    <div className="action-content">
-                      <h3>Clients</h3>
-                      <p>Voir les clients</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'planning'}>
-                    <div className="action-content">
-                      <h3>Mon Planning</h3>
-                      <p>Voir mes tâches</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'expenses'}>
-                    <div className="action-content">
-                      <h3>Mes Dépenses</h3>
-                      <p>Soumettre une dépense</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'my-access'}>
-                    <div className="action-content">
-                      <h3>Mes Demandes d'Accès</h3>
-                      <p>Voir mes missions approuvées</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-
-                  {/* Kept from the removed banner so the overview still offers a
-                      one-click route to the leave page. */}
-                  <button className="quick-action-card" onClick={() => window.location.hash = 'conge'}>
-                    <div className="action-content">
-                      <h3>Mes Congés</h3>
-                      <p>Demander un congé</p>
-                    </div>
-                    <div className="action-arrow">›</div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'overview' && <DashboardOverview role="employer" />}
 
           {activeTab === 'clients' && <ClientList />}
           {activeTab === 'taches' && <PlanningList />}

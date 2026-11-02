@@ -19,7 +19,7 @@ const signToken = (user) =>
 // anyone who could reach the API could create themselves an administrator.
 // It is now a one-time bootstrap: once any user exists it refuses, and staff
 // accounts are created through POST /api/rh/employees instead.
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res, next) => {
   try {
     const existingUsers = await User.estimatedDocumentCount();
     if (existingUsers > 0) {
@@ -79,7 +79,7 @@ router.post('/register', async (req, res) => {
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -115,27 +115,26 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   GET /api/auth/me
 // @desc    Get current user
 // @access  Private
-router.get('/me', protect, async (req, res) => {
+router.get('/me', protect, async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json({ success: true, user });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 
 // @route   PUT /api/auth/change-password
 // @desc    Change own password
 // @access  Private
-router.put('/change-password', protect, async (req, res) => {
+router.put('/change-password', protect, async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (typeof currentPassword !== 'string' || !currentPassword || !newPassword) {
@@ -159,7 +158,7 @@ router.put('/change-password', protect, async (req, res) => {
 
     res.json({ success: true, message: 'Mot de passe modifié avec succès' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 });
 

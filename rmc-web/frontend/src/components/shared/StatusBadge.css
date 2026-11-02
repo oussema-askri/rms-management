@@ -1,0 +1,61 @@
+/* Prefixed so no component stylesheet can override it by accident: CRA loads
+   every .css file globally, which is how `.status-badge { color: white }` in
+   one list leaked into all the others. */
+.rms-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+.rms-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.rms-status--success {
+  background: var(--status-success-bg);
+  border-color: #c4e8d5;
+  color: var(--status-success-text);
+}
+.rms-status--success::before { background: var(--status-success); }
+
+.rms-status--warning {
+  background: var(--status-warning-bg);
+  border-color: #fbdca0;
+  color: var(--status-warning-text);
+}
+.rms-status--warning::before { background: var(--status-warning); }
+
+.rms-status--danger {
+  background: var(--status-danger-bg);
+  border-color: #f5c6c4;
+  color: var(--status-danger-text);
+}
+.rms-status--danger::before { background: var(--status-danger); }
+
+.rms-status--info {
+  background: var(--status-info-bg);
+  border-color: #c7daf6;
+  color: var(--status-info-text);
+}
+.rms-status--info::before { background: var(--status-info); }
+
+.rms-status--neutral {
+  background: var(--status-neutral-bg);
+  border-color: #dde1e7;
+  color: var(--status-neutral-text);
+}
+.rms-status--neutral::before { background: var(--status-neutral); }
