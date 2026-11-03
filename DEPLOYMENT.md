@@ -144,6 +144,27 @@ bash /srv/rms/src/deploy/update.sh
 `update.sh` is safe to re-run for every future deploy. It never touches
 `uploads/` or `.env`.
 
+### Deploying from Windows (how updates are done today)
+
+Git Bash has no `rsync`, and a plain `git archive` on a machine with
+`core.autocrlf=true` writes Windows line endings, which makes `update.sh` fail
+with `$'\r': command not found`. Ship the committed tree with LF endings:
+
+```bash
+git -c core.autocrlf=false -c core.eol=lf archive --format=tar.gz \
+  -o /tmp/rms.tgz HEAD rmc-web deploy
+scp -i ~/.ssh/rms_server /tmp/rms.tgz root@162.35.19.90:/tmp/
+ssh -i ~/.ssh/rms_server root@162.35.19.90 '
+  cd /srv/rms/src && tar -xzf /tmp/rms.tgz && rm /tmp/rms.tgz
+  /usr/local/bin/rms-backup.sh            # backup before every deploy
+  bash /srv/rms/src/deploy/update.sh > /var/log/rms-deploy-last.log 2>&1; echo "exit=$?"
+  echo <commit-sha> > /srv/rms/src/DEPLOYED_COMMIT'
+```
+
+In Git Bash, `$TEMP` is a `C:\...` path that `tar` reads as a remote host; use
+`/tmp` or `$(cygpath -u "$TEMP")` instead. Check `exit=0` and "Deployed." in the
+log rather than piping the script through `tail`, which hides a failure.
+
 ## 6. TLS
 
 ```bash
@@ -258,6 +279,12 @@ The build runs on Expo's servers and takes 10–20 minutes, ending with a downlo
 link and a QR code. Staff open that link on their phone, allow installation from
 unknown sources once, and install.
 
+Build files are kept for **14 days**. After that the old link fails with
+"The specified key does not exist" — the APK was deleted, nothing is wrong with
+the phone. Download the `.apk` itself and share the file, or run a new build
+(`npx eas-cli build:list` shows each build's expiry date). The signing key is
+stored on Expo's servers, so later builds can run with `--non-interactive`.
+
 The free tier allows 30 builds a month, which is ample here. The application id
 is `tn.riyada.rms`; changing it later means every phone has to uninstall and
 reinstall, so change it now if you want something different.
@@ -267,15 +294,9 @@ the app pulls JavaScript changes over the air without a reinstall.
 
 ## Before real staff use this
 
-Four defects found during the audit cause silent data loss or let
-money-related records go wrong. They are worth fixing before payroll data lives
-on a server people depend on:
-
-- A `responsable` editing any employee wipes that employee's CNSS number.
-- Leave approval never checks the remaining balance; 30 days can be approved
-  against an 18-day entitlement.
-- Unsigned delivery slips can be invoiced and then keep accruing unbillable work.
-- Signed slips already attached to an invoice can still be deleted.
+The four data-loss defects that used to be listed here (CNSS wiped by a
+responsable's edit, leave approved past the balance, unsigned slips invoiced,
+invoiced slips deleted) were fixed in `ae9bb1b`; see `CHANGELOG.md`.
 
 Also outstanding from `SECURITY.md`: purge the uploaded files from git history,
 and reset any password that was ever set to the old default.
